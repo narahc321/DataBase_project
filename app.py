@@ -10,8 +10,13 @@ app = Flask(__name__)
 # config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
+<<<<<<< HEAD
+app.config['MYSQL_PASSWORD'] = 'Tazzmilo2012'
+app.config['MYSQL_DB'] = 'voter'
+=======
 app.config['MYSQL_PASSWORD'] = 'cherry'
 app.config['MYSQL_DB'] = 'myflaskapp'
+>>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #init MYSQL
@@ -26,6 +31,21 @@ def index():
 def about():
     return render_template('about.html')
 
+<<<<<<< HEAD
+
+class Registerform(Form):
+    name = StringField('Name',[validators.Length(min=1,max=30)])
+    gender = StringField('gender',[validators.Length(min=1,max=30)])
+    dob = StringField('Date Of Birth(YYYY-MM-DD)',[validators.Length(min=10,max=10)])
+    aadhaar_no = StringField('aadhaar Number',[validators.Length(min=12,max=12)])
+    father_name = StringField('Father Name',[validators.Length(min=1,max=30)])
+    address = StringField('Door Number',[validators.Length(min=1,max=30)])
+    city = StringField('City',[validators.Length(min=1,max=30)])
+    pincode = StringField('Pincode',[validators.Length(min=6,max=6)])
+    state = StringField('State',[validators.Length(min=1,max=30)])
+    phone = StringField('Phone Number',[validators.Length(min=10,max=11)])
+    email_id = StringField('Email ID')
+=======
 @app.route('/articles')
 def articles():
     #create cursor
@@ -61,6 +81,7 @@ class Registerform(Form):
     name = StringField('Name',[validators.Length(min=1,max=30)])
     username = StringField('Username',[validators.Length(min=1,max=30)])
     email = StringField('Email',[validators.Length(min=6,max=50)])
+>>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
     password = PasswordField('Password',[
         validators.DataRequired(),
         validators.EqualTo('confirm', message='passwords do not match')
@@ -72,15 +93,32 @@ def register():
     form =Registerform(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
+<<<<<<< HEAD
+        gender = form.gender.data
+        dob = form.dob.data
+        aadhaar_no = form.aadhaar_no.data
+        father_name = form.father_name.data
+        address = form.address.data
+        city = form.city.data
+        pincode = form.pincode.data
+        state = form.state.data
+        phone = form.phone.data
+        email_id =form.email_id.data
+=======
         email =form.email.data
         username = form.username.data
+>>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
         password = sha256_crypt.encrypt(str(form.password.data))
 
         #Create cursor
         cur = mysql.connection.cursor()
 
         #execute query
+<<<<<<< HEAD
+        cur.execute("INSERT INTO voter_infor(Name, gender, DOB, aadhaar_no, father_name, Address, city, pincode, state, phone, email_id, password ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, city, pincode, state, phone, email_id, password))
+=======
         cur.execute("INSERT INTO users(name ,email_id ,user_name ,password ) VALUES(%s, %s, %s, %s)",(name,email,username,password))
+>>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
 
         #Commit to DB
         mysql.connection.commit()
@@ -266,4 +304,8 @@ def delete_article(id):
     return redirect(url_for('dashboard'))
 if __name__ == '__main__':
     app.secret_key='secret123'
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    app.run(debug=True)
+>>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
