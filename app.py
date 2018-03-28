@@ -10,13 +10,8 @@ app = Flask(__name__)
 # config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-<<<<<<< HEAD
 app.config['MYSQL_PASSWORD'] = 'Tazzmilo2012'
 app.config['MYSQL_DB'] = 'voter'
-=======
-app.config['MYSQL_PASSWORD'] = 'cherry'
-app.config['MYSQL_DB'] = 'myflaskapp'
->>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #init MYSQL
@@ -31,13 +26,12 @@ def index():
 def about():
     return render_template('about.html')
 
-<<<<<<< HEAD
 
 class Registerform(Form):
     name = StringField('Name',[validators.Length(min=1,max=30)])
     gender = StringField('gender',[validators.Length(min=1,max=30)])
     dob = StringField('Date Of Birth(YYYY-MM-DD)',[validators.Length(min=10,max=10)])
-    aadhaar_no = StringField('aadhaar Number',[validators.Length(min=12,max=12)])
+    aadhaar_no = StringField('aadhaar Number',[validators.Length(min=12,max=16)])
     father_name = StringField('Father Name',[validators.Length(min=1,max=30)])
     address = StringField('Door Number',[validators.Length(min=1,max=30)])
     city = StringField('City',[validators.Length(min=1,max=30)])
@@ -45,43 +39,6 @@ class Registerform(Form):
     state = StringField('State',[validators.Length(min=1,max=30)])
     phone = StringField('Phone Number',[validators.Length(min=10,max=11)])
     email_id = StringField('Email ID')
-=======
-@app.route('/articles')
-def articles():
-    #create cursor
-    cur = mysql.connection.cursor()
-
-    #get articles
-    result=cur.execute("SELECT * FROM articles")
-
-    articles = cur.fetchall()
-
-    if result > 0:
-        return render_template('articles.html', articles=articles)
-    else:
-        msg= 'No Articles Found'
-        return render_template('articles.html',msg=msg)
-    
-    #close connection
-    cur.close()
-
-@app.route('/article/<string:id>/')
-def article(id):
-    #create cursor
-    cur = mysql.connection.cursor()
-
-    #get articles
-    cur.execute("SELECT * FROM articles WHERE id= %s ",[id] )
-
-    article = cur.fetchone()
-
-    return render_template('article.html',  article = article)
-
-class Registerform(Form):
-    name = StringField('Name',[validators.Length(min=1,max=30)])
-    username = StringField('Username',[validators.Length(min=1,max=30)])
-    email = StringField('Email',[validators.Length(min=6,max=50)])
->>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
     password = PasswordField('Password',[
         validators.DataRequired(),
         validators.EqualTo('confirm', message='passwords do not match')
@@ -93,7 +50,6 @@ def register():
     form =Registerform(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
-<<<<<<< HEAD
         gender = form.gender.data
         dob = form.dob.data
         aadhaar_no = form.aadhaar_no.data
@@ -104,21 +60,13 @@ def register():
         state = form.state.data
         phone = form.phone.data
         email_id =form.email_id.data
-=======
-        email =form.email.data
-        username = form.username.data
->>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
         password = sha256_crypt.encrypt(str(form.password.data))
 
         #Create cursor
         cur = mysql.connection.cursor()
 
         #execute query
-<<<<<<< HEAD
         cur.execute("INSERT INTO voter_infor(Name, gender, DOB, aadhaar_no, father_name, Address, city, pincode, state, phone, email_id, password ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, city, pincode, state, phone, email_id, password))
-=======
-        cur.execute("INSERT INTO users(name ,email_id ,user_name ,password ) VALUES(%s, %s, %s, %s)",(name,email,username,password))
->>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
 
         #Commit to DB
         mysql.connection.commit()
@@ -136,7 +84,7 @@ def register():
 def login():
     if request.method =='POST':
         #get form feilds
-        username = request.form['username']
+        username = request.form['aadhaar']
         password_candidate = request.form['password']
 
         #craete cursor
@@ -144,7 +92,7 @@ def login():
         cur =mysql.connection.cursor()
 
         #get user by username
-        result = cur.execute("SELECT * FROM users WHERE user_name=%s",[username])
+        result = cur.execute("SELECT * FROM voter_infor WHERE aadhaar_no=%s",[username])
         if result>0 :
             #get hash
             data = cur.fetchone()
@@ -197,7 +145,7 @@ def dashboard():
     cur = mysql.connection.cursor()
 
     #get articles
-    result=cur.execute("SELECT * FROM articles")
+    result=cur.execute("SELECT * FROM voter_infor")
 
     articles = cur.fetchall()
 
@@ -214,98 +162,8 @@ def dashboard():
 class ArticleForm(Form):
     title = StringField('Title',[validators.Length(min=1,max=200)])
     body = TextAreaField('Body',[validators.Length(min=30)])
-    
-#Add article
-@app.route('/add_article', methods=['GET','POST'])
-@is_logged_in
-def add_article():
-    form = ArticleForm(request.form)
-    if request.method == 'POST' and form.validate():
-        title = form.title.data
-        body = form.body.data
 
-        #create cursor
-        cur =mysql.connection.cursor()
 
-        #execute
-        cur.execute("INSERT INTO articles(title, body, author) VALUES (%s ,%s, %s)",(title,body,session['username']))
-
-        #commit to DB
-        mysql.connection.commit()
-
-        #close connection
-        cur.close()
-
-        #flash msg 
-        flash('Article created', 'success')
-
-        return redirect(url_for('dashboard'))
-
-    return render_template('add_article.html', form=form)
-
-#edit article
-@app.route('/edit_article/<string:id>', methods=['GET','POST'])
-@is_logged_in
-def edit_article(id):
-    #create cursor
-    cur = mysql.connection.cursor()
-
-    # get article by id
-    cur.execute("SELECT * from articles WHERE id= %s",[id])
-    
-    article = cur.fetchone()
-
-    form = ArticleForm(request.form)
-    
-    form.title.data = article['title']
-    form.body.data = article['body']
-
-    #cur.close()
-
-    if request.method == 'POST' and form.validate():
-        title = request.form['title']
-        body = request.form['body']
-
-        #create cursor
-        cur =mysql.connection.cursor()
-
-        #execute
-        cur.execute("UPDATE articles SET title=%s, body=%s WHERE id=%s",(title,body,id))
-
-        #commit to DB
-        mysql.connection.commit()
-
-        #close connection
-        cur.close()
-
-        #flash msg 
-        flash('Article Updated', 'success')
-
-        return redirect(url_for('dashboard'))
-
-    return render_template('edit_article.html', form=form)
-
-# delete article
-@app.route('/delete_article/<string:id>', methods=['POST'])
-@is_logged_in
-def delete_article(id):
-    # create cursor
-    cur = mysql.connection.cursor()
-
-    #execute
-
-    cur.execute("DELETE FROM articles WHERE id = %s ",[id])
-
-    mysql.connection.commit()
-
-    cur.close()
-
-    flash('Article Deleted', 'success')
-    return redirect(url_for('dashboard'))
 if __name__ == '__main__':
     app.secret_key='secret123'
-<<<<<<< HEAD
     app.run(debug=True)
-=======
-    app.run(debug=True)
->>>>>>> ed51011e0dfaabfc82ba2de26848530bdf54541c
