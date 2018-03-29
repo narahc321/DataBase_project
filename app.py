@@ -28,22 +28,22 @@ def about():
 
 
 class Registerform(Form):
-    name = StringField('Name',[validators.Length(min=1,max=30)])
-    gender = StringField('gender',[validators.Length(min=1,max=30)])
-    dob = StringField('Date Of Birth(YYYY-MM-DD)',[validators.Length(min=10,max=10)])
-    aadhaar_no = StringField('aadhaar Number',[validators.Length(min=12,max=16)])
-    father_name = StringField('Father Name',[validators.Length(min=1,max=30)])
-    address = StringField('Door Number',[validators.Length(min=1,max=30)])
-    city = StringField('City',[validators.Length(min=1,max=30)])
-    pincode = StringField('Pincode',[validators.Length(min=6,max=6)])
-    state = StringField('State',[validators.Length(min=1,max=30)])
-    phone = StringField('Phone Number',[validators.Length(min=10,max=11)])
-    email_id = StringField('Email ID')
-    password = PasswordField('Password',[
+    name = StringField('Name*',[validators.Length(min=1,max=30)])
+    gender = StringField('Gender (M/F/T)*',[validators.Length(min=1,max=30)])
+    dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
+    aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
+    father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
+    address = StringField('Address*',[validators.Length(min=1,max=30)])
+    city = StringField('City*',[validators.Length(min=1,max=30)])
+    pincode = StringField('Pincode*',[validators.Length(min=6,max=6)])
+    state = StringField('State*',[validators.Length(min=1,max=30)])
+    phone = StringField('Phone Number*',[validators.Length(min=10,max=11)])
+    email_id = StringField('Email-ID')
+    password = PasswordField('Password*',[
         validators.DataRequired(),
         validators.EqualTo('confirm', message='passwords do not match')
     ])
-    confirm = PasswordField('confirm password')
+    confirm = PasswordField('Confirm Password*')
 
 @app.route('/register',methods=['GET','POST'])
 def register():
