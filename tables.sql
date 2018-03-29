@@ -17,7 +17,6 @@ CREATE TABLE Voter(
 
 CREATE TABLE City(
 	PinCode VARCHAR(50),
-	City VARCHAR(50),
 	ConstituencyId INT(50),
 	PRIMARY KEY (PinCode)
 );

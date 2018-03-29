@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'iiita123'
-app.config['MYSQL_DB'] = 'voter'
+app.config['MYSQL_DB'] = 'MobileVoting'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #init MYSQL
@@ -66,13 +66,34 @@ def register():
         cur = mysql.connection.cursor()
 
         #execute query
-        cur.execute("INSERT INTO voter_infor(Name, gender, DOB, aadhaar_no, father_name, Address, city, pincode, state, phone, email_id, password ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, city, pincode, state, phone, email_id, password))
-
+        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
+	
         #Commit to DB
         mysql.connection.commit()
 
         #close connection
         cur.close()
+
+	cur = mysql.connection.cursor()
+
+        #execute query
+        result = cur.execute("SELECT ConstituencyId FROM Constituency WHERE State = %s",[state])
+	
+        #Commit to DB
+        mysql.connection.commit()
+
+        #close connection
+        cur.close()
+	
+	cur = mysql.connection.cursor()
+	cur.execute("INSERT INTO City(PinCode,ConstituencyId) VALUES(%s,%s)",(pincode,result))
+	#Commit to DB
+        mysql.connection.commit()
+
+        #close connection
+        cur.close()
+
+        
 
         flash('you are now registered and can log in', 'success')
 
@@ -92,7 +113,7 @@ def login():
         cur =mysql.connection.cursor()
 
         #get user by username
-        result = cur.execute("SELECT * FROM voter_infor WHERE aadhaar_no=%s",[username])
+        result = cur.execute("SELECT * FROM Voter WHERE aadhaar_no=%s",[username])
         if result>0 :
             #get hash
             data = cur.fetchone()
@@ -145,7 +166,7 @@ def dashboard():
     cur = mysql.connection.cursor()
 
     #get articles
-    result=cur.execute("SELECT * FROM voter_infor")
+    result=cur.execute("SELECT * FROM Voter")
 
     articles = cur.fetchall()
 
