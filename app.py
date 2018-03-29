@@ -61,6 +61,17 @@ def register():
         phone = form.phone.data
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
+	
+	cur =mysql.connection.cursor()
+
+        #get user by username
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
+        if result>0 :
+            
+            error = 'Already a user! Try logging in'
+            return render_template('login.html', error = error)
+            # cur close
+            cur.close()
 
         #Create cursor
         cur = mysql.connection.cursor()
@@ -77,8 +88,9 @@ def register():
 	cur = mysql.connection.cursor()
 
         #execute query
-        result = cur.execute("SELECT ConstituencyId FROM Constituency WHERE State = %s",[state])
-	
+        result = cur.execute("SELECT * FROM Constituency WHERE State = %s",[state])
+	data = cur.fetchone()
+	constitutionid = data['ConstituencyId']
         #Commit to DB
         mysql.connection.commit()
 
@@ -113,11 +125,11 @@ def login():
         cur =mysql.connection.cursor()
 
         #get user by username
-        result = cur.execute("SELECT * FROM Voter WHERE aadhaar_no=%s",[username])
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
             #get hash
             data = cur.fetchone()
-            password = data['password']
+            password = data['Password']
 
             #campare passwords
             if sha256_crypt.verify(password_candidate, password):
