@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
 from functools import wraps
 
@@ -29,7 +29,7 @@ def about():
 
 class Registerform(Form):
     name = StringField('Name*',[validators.Length(min=1,max=30)])
-    gender = StringField('Gender (M/F/T)*',[validators.Length(min=1,max=30)])
+    gender = RadioField('Gender', choices=[('Male','Male'),('Female','Female'),('Other','Other')])
     dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
     aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
     father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
@@ -85,17 +85,17 @@ def register():
         #close connection
         cur.close()
 
-	cur = mysql.connection.cursor()
+	    # cur = mysql.connection.cursor()
 
-        #execute query
-        result = cur.execute("SELECT * FROM Constituency WHERE State = %s",[state])
-	data = cur.fetchone()
-	constitutionid = data['ConstituencyId']
-        #Commit to DB
-        mysql.connection.commit()
+        # #execute query
+        # result = cur.execute("SELECT * FROM Constituency WHERE State = %s",[state])
+	    # data = cur.fetchone()
+	    # constitutionid = data['ConstituencyId']
+        # #Commit to DB
+        # mysql.connection.commit()
 
-        #close connection
-        cur.close()
+        # #close connection
+        # cur.close()
 	
 	cur = mysql.connection.cursor()
 	cur.execute("INSERT INTO City(PinCode,ConstituencyId) VALUES(%s,%s)",(pincode,result))

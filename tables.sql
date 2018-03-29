@@ -72,3 +72,6 @@ INSERT INTO Constituency (STATE) VALUES("Tripura");
 INSERT INTO Constituency (STATE) VALUES("Uttarakhand");
 INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
+
+alter table Constituency 
+ADD column city varchar(30) after state;
