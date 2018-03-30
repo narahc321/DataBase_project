@@ -17,6 +17,7 @@ CREATE TABLE Voter(
 
 CREATE TABLE City(
 	PinCode VARCHAR(50),
+	city VARCHAR(50),
 	ConstituencyId INT(50),
 	PRIMARY KEY (PinCode)
 );
@@ -73,5 +74,5 @@ INSERT INTO Constituency (STATE) VALUES("Uttarakhand");
 INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
 
-alter table Constituency 
-ADD column city varchar(30) after state;
+alter table City 
+ADD column city varchar(30) after PinCode;

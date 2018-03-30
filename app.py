@@ -58,7 +58,7 @@ def register():
         name = form.name.data
         gender = form.gender.data
         # dob = form.dob.data
-        dob = form.date.data.strftime('%Y-%m-%d')
+        dob = form.dob.data.strftime('%Y-%m-%d')
         aadhaar_no = form.aadhaar_no.data
         father_name = form.father_name.data
         address = form.address.data
@@ -195,4 +195,3 @@ class ArticleForm(Form):
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
-
