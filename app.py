@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
 from passlib.hash import sha256_crypt
 from functools import wraps
 
@@ -29,7 +29,7 @@ def about():
 
 class Registerform(Form):
     name = StringField('Name*',[validators.Length(min=1,max=30)])
-    gender = StringField('Gender (M/F/T)*',[validators.Length(min=1,max=30)])
+    gender = RadioField('Gender', choices=[('Male','Male'),('Female','Female'),('Other','Other')])
     dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
     aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
     father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
@@ -61,23 +61,23 @@ def register():
         phone = form.phone.data
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
+	
+	cur =mysql.connection.cursor()
+
+        #get user by username
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
+        if result>0 :
+            
+            error = 'Already a user! Try logging in'
+            return render_template('login.html', error = error)
+            # cur close
+            cur.close()
 
         #Create cursor
         cur = mysql.connection.cursor()
 
         #execute query
         cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
-	
-        #Commit to DB
-        mysql.connection.commit()
-
-        #close connection
-        cur.close()
-
-	cur = mysql.connection.cursor()
-
-        #execute query
-        result = cur.execute("SELECT ConstituencyId FROM Constituency WHERE State = %s",[state])
 	
         #Commit to DB
         mysql.connection.commit()
@@ -113,11 +113,11 @@ def login():
         cur =mysql.connection.cursor()
 
         #get user by username
-        result = cur.execute("SELECT * FROM Voter WHERE aadhaar_no=%s",[username])
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
             #get hash
             data = cur.fetchone()
-            password = data['password']
+            password = data['Password']
 
             #campare passwords
             if sha256_crypt.verify(password_candidate, password):
@@ -188,3 +188,4 @@ class ArticleForm(Form):
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
+
