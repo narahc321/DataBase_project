@@ -2,16 +2,16 @@ CREATE DATABASE MobileVoting;
 USE MobileVoting;
 
 CREATE TABLE Voter(
-	Name VARCHAR(50),
+	Name VARCHAR(100),
 	Gender VARCHAR(20),
 	DateOfBirth DATE,
 	AadhaarNumber VARCHAR(20),
-	FatherName VARCHAR(50),
-	Address VARCHAR(50),
+	FatherName VARCHAR(70),
+	Address VARCHAR(150),
 	PinCode VARCHAR(50),
 	MobileNumber VARCHAR(50),
 	EmailId VARCHAR(50),
-	Password VARCHAR(50),
+	Password VARCHAR(255),
 	PRIMARY KEY (AadhaarNumber)
 );
 
@@ -72,3 +72,6 @@ INSERT INTO Constituency (STATE) VALUES("Tripura");
 INSERT INTO Constituency (STATE) VALUES("Uttarakhand");
 INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
+
+alter table Constituency 
+ADD column city varchar(30) after state;

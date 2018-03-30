@@ -7,9 +7,8 @@
         <div class="form-group">
             {{render_field(form.name, class_ = "form-control")}}
         </div>
-        <div class="form-group">
-            {{render_field(form.gender, class_ = "form-control")}}
-        </div>
+        <!-- <h6>Gender*</h6> -->
+        {{ form.gender }}
         <div class="form-group">
             {{render_field(form.dob, class_ = "form-control")}}
         </div>
