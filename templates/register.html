@@ -9,8 +9,12 @@
         </div>
         <h6>Gender*</h6>
         {{ form.gender }}
+        <h6>Date of Birth*</h6>
+
+        {{ form.dob(class='datepicker') }}
         <div class="form-group">
-            {{render_field(form.dob, class_ = "form-control")}}
+            
+            <!-- {{render_field(form.dob, class_ = "form-control")}} -->
         </div>
         <div class="form-group">
             {{render_field(form.aadhaar_no, class_ = "form-control")}}

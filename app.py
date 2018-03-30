@@ -1,8 +1,9 @@
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, DateField
 from passlib.hash import sha256_crypt
 from functools import wraps
+from wtforms.fields.html5 import DateField
 
 
 app = Flask(__name__)
@@ -34,7 +35,8 @@ class Registerform(Form):
         [validators.Required()],
         choices=[('M', 'Male'), ('F', 'Female'),('F', 'Other')], default='M'
     )
-    dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
+    # dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
+    dob = DateField('DatePicker', format='%Y-%m-%d')
     aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
     father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
     address = StringField('Address*',[validators.Length(min=1,max=30)])
@@ -55,7 +57,8 @@ def register():
     if request.method == 'POST' and form.validate():
         name = form.name.data
         gender = form.gender.data
-        dob = form.dob.data
+        # dob = form.dob.data
+        dob = form.date.data.strftime('%Y-%m-%d')
         aadhaar_no = form.aadhaar_no.data
         father_name = form.father_name.data
         address = form.address.data
