@@ -29,7 +29,11 @@ def about():
 
 class Registerform(Form):
     name = StringField('Name*',[validators.Length(min=1,max=30)])
-    gender = RadioField('Gender', choices=[('Male','Male'),('Female','Female'),('Other','Other')])
+    gender = RadioField(
+        'Gender?',
+        [validators.Required()],
+        choices=[('M', 'Male'), ('F', 'Female'),('F', 'Other')], default='M'
+    )
     dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
     aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
     father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
