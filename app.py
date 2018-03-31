@@ -133,13 +133,17 @@ def register_candidate():
     return render_template('register_candidate.html',form=form)
 
 
+class Loginform(Form):
+    aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
+    password = PasswordField('',[validators.DataRequired()])
+
+
 #user login
 @app.route('/login',methods=['GET','POST'])
 def login():
-    if request.method =='POST':
-        #get form feilds
-        username = request.form['aadhaar']
-        password_candidate = request.form['password']
+    if request.method == 'POST' and form.validate():
+        username = form.aadhaar_no.data
+        password_candidate = form.password.data
 
         #craete cursor
 
@@ -221,3 +225,4 @@ class ArticleForm(Form):
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
+
