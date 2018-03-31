@@ -29,27 +29,27 @@ def about():
 
 
 class Registerform(Form):
-    name = StringField('Name*',[validators.Length(min=1,max=30)])
+    name = StringField('',[validators.Length(min=1,max=30)])
     gender = RadioField(
         'Gender?',
         [validators.Required()],
         choices=[('M', 'Male'), ('F', 'Female'),('F', 'Other')], default='M'
     )
     # dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
-    dob = DateField('DatePicker', format='%Y-%m-%d')
-    aadhaar_no = StringField('Aadhaar Number*',[validators.Length(min=12,max=16)])
-    father_name = StringField('Father Name*',[validators.Length(min=1,max=30)])
-    address = StringField('Address*',[validators.Length(min=1,max=30)])
-    city = StringField('City*',[validators.Length(min=1,max=30)])
-    pincode = StringField('Pincode*',[validators.Length(min=6,max=6)])
-    state = StringField('State*',[validators.Length(min=1,max=30)])
-    phone = StringField('Phone Number*',[validators.Length(min=10,max=11)])
-    email_id = StringField('Email-ID')
-    password = PasswordField('Password*',[
+    dob = DateField('', format='%Y-%m-%d')
+    aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
+    father_name = StringField('',[validators.Length(min=1,max=30)])
+    address = StringField('',[validators.Length(min=1,max=30)])
+    city = StringField('',[validators.Length(min=1,max=30)])
+    pincode = StringField('',[validators.Length(min=6,max=6)])
+    state = StringField('',[validators.Length(min=1,max=30)])
+    phone = StringField('',[validators.Length(min=10,max=11)])
+    email_id = StringField('')
+    password = PasswordField('',[
         validators.DataRequired(),
         validators.EqualTo('confirm', message='passwords do not match')
     ])
-    confirm = PasswordField('Confirm Password*')
+    confirm = PasswordField('')
 
 @app.route('/register',methods=['GET','POST'])
 def register():
