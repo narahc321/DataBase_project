@@ -114,6 +114,24 @@ def register():
     return render_template('register.html',form=form)
 
 
+class CandidateRegisterform(Form):
+    
+    state = StringField('State*',[validators.Length(min=1,max=30)])
+    
+    
+@app.route('/register_candidate',methods=['GET','POST'])
+def register_candidate():
+    form = CandidateRegisterform(request.form)
+    if request.method == 'POST' and form.validate():
+        
+        state = form.state.data
+        
+        
+
+        flash('you are now registered and can log in', 'success')
+
+    return render_template('register_candidate.html',form=form)
+
 
 #user login
 @app.route('/login',methods=['GET','POST'])
