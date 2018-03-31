@@ -4,6 +4,7 @@ from wtforms import Form, StringField, TextAreaField, PasswordField, validators,
 from passlib.hash import sha256_crypt
 from functools import wraps
 from wtforms.fields.html5 import DateField
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -111,6 +112,8 @@ def register():
 
         return redirect(url_for('login'))
     return render_template('register.html',form=form)
+
+
 
 #user login
 @app.route('/login',methods=['GET','POST'])
