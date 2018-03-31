@@ -263,10 +263,25 @@ def dashboard():
     #if result > 0:
     return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
-#Article form class
-class ArticleForm(Form):
-    title = StringField('Title',[validators.Length(min=1,max=200)])
-    body = TextAreaField('Body',[validators.Length(min=30)])
+@app.route('/dashboard_candidate')
+@is_logged_in
+def dashboard_candidate():
+    # retrieve your user in another view
+    username = session['username']
+    # redirect to login using url_for to the login page if user mismatch or None
+
+    #create cursor
+    cur = mysql.connection.cursor()
+    #get articles
+    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    user_details = cur.fetchone()
+    
+    pincode =  user_details['PinCode']
+    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    city_details = cur.fetchone()
+    cur.close()
+    #if result > 0:
+    return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
 
 
 if __name__ == '__main__':
