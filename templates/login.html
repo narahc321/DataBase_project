@@ -3,9 +3,12 @@
 {% block body %}
     <h1>Login</h1>
     <form action="" method="POST">
+    {% include 'includes/_messages.html' %}
+    {% from "includes/_formhelpers.html" import render_field %}
+
         <div class="form-group">
             <label>Aadhaar</label>
-            {{render_field(form.aadhaar, class_="form-control")}}
+            {{render_field(form.aadhaar_no, class_="form-control")}}
         </div>
         <div class="form-group">
             <label>Password</label>
@@ -13,10 +16,10 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>        
-{% endblock %} -->
+{% endblock %}
+ -->
 
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -27,8 +30,8 @@
         <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
         <link rel="stylesheet" href="../static/css/material-dashboard.css?v=2.0.1">
         <link href="../static/assets-for-demo/demo.css" rel="stylesheet" />
-        <!-- <link rel="stylesheet" type="text/css" href="../static/styleregister.css">
- -->
+        <link rel="stylesheet" type="text/css" href="../static/styleregister.css">
+
     </head>
 <body>
         <nav class="navbar navbar-header">
@@ -100,13 +103,12 @@
             </div>
         </div>  
     </div>    
-        <script src="//cdn.ckeditor.com/4.9.0/standard/ckeditor.js"></script>
-        <script type="text/javascript">
-            CKEDITOR.replace('editor')
-        </script>
+        
     </body>
 <script type="text/javascript" src = "../static/js/jquery-3.3.1.min.js"></script>
 <!-- <script src="../static/js/core/jquery.min.js"></script>
  -->
 
 </html>
+
+

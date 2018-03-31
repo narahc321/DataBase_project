@@ -141,6 +141,7 @@ class Loginform(Form):
 #user login
 @app.route('/login',methods=['GET','POST'])
 def login():
+    form =Loginform(request.form)
     if request.method == 'POST' and form.validate():
         username = form.aadhaar_no.data
         password_candidate = form.password.data
@@ -173,7 +174,7 @@ def login():
             error = 'Username not found'
             return render_template('login.html', error = error)
 
-    return render_template('login.html')
+    return render_template('login.html',form=form)
 
 # check if user logged in
 def is_logged_in(f):
