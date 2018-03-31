@@ -8,10 +8,10 @@
             <li><a href="/about">About</a></li>
             <li><a href="/articles">Articles</a></li>
           </ul> -->
-          <ul class="nav navbar-right">
+          <ul class="nav navbar-left">
             <li><a href="/">Home</a></li>
           </ul>
-          <ul class="nav navbar-right">
+          <ul class="nav navbar-left">
             <li><a href="/about">About</a></li>
           </ul>
           {% if session.logged_in %}
@@ -23,11 +23,18 @@
             </ul>
           {% else %}
             <ul class="nav navbar-right">
-              <li><a href="/login">Login</a></li>
+              <li><a href="/login">Login as Voter</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/register">Register</a></li>
+              <li><a href="/dashboard">Login as Election Officer</a></li>
             </ul>
+            <ul class="nav navbar-right">
+              <li><a href="/register">Register as Voter</a></li>
+            </ul>
+            <ul class="nav navbar-right">
+              <li><a href="/dashboard">Register as Candidate</a></li>
+            </ul>
+
           {% endif %}
         </div>
       </nav>
