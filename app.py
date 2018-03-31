@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, DateField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, DateField,SelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
 from wtforms.fields.html5 import DateField
@@ -17,6 +17,13 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #init MYSQL
 mysql = MySQL(app)
+
+rows = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+    "Goa","Gujarat","Haryana","Himachal Pradesh","Jammu And Kashmir",
+    "Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
+    "Manipur","Meghalaya","Mizoram","Nagaland","Odisha",
+    "Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+    "Tripura","Uttarakhand","Uttar Pradesh","West Bengal"]
 
 
 @app.route('/')
@@ -42,7 +49,8 @@ class Registerform(Form):
     address = StringField('',[validators.Length(min=1,max=30)])
     city = StringField('',[validators.Length(min=1,max=30)])
     pincode = StringField('',[validators.Length(min=6,max=6)])
-    state = StringField('',[validators.Length(min=1,max=30)])
+    state = SelectField(label='state', 
+        choices=[(state, state) for state in rows])
     phone = StringField('',[validators.Length(min=10,max=11)])
     email_id = StringField('')
     password = PasswordField('',[
@@ -85,10 +93,11 @@ def register():
         result = cur.execute("SELECT * FROM Constituency WHERE State=%s",[state])
         if result>0 :
             data = cur.fetchone()
+            print data
             result = data['Id']
         
-        result = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
-        if result<=0 :
+        number = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+        if number<=0 :
             #cur = mysql.connection.cursor()
             cur.execute("INSERT INTO City(PinCode,city,ConstituencyId) VALUES(%s,%s,%s)",(pincode,city,result))
 	        #Commit to DB
