@@ -69,35 +69,31 @@ def register():
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
 	
-	cur =mysql.connection.cursor()
+        cur =mysql.connection.cursor()
 
         #get user by username
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
         if result>0 :
-            
             error = 'Already a user! Try logging in'
             return render_template('login.html', error = error)
-            # cur close
-            cur.close()
-
-        #Create cursor
-        cur = mysql.connection.cursor()
-
+        
         #execute query
         cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
 	
         #Commit to DB
         mysql.connection.commit()
-
-        #close connection
-        cur.close()
-	
-	cur = mysql.connection.cursor()
-	cur.execute("INSERT INTO City(PinCode,ConstituencyId) VALUES(%s,%s)",(pincode,result))
-	#Commit to DB
-        mysql.connection.commit()
-
-        #close connection
+        result = cur.execute("SELECT * FROM Constituency WHERE State=%s",[state])
+        if result>0 :
+            data = cur.fetchone()
+            result = data['Id']
+        
+        result = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+        if result<=0 :
+            #cur = mysql.connection.cursor()
+            cur.execute("INSERT INTO City(PinCode,city,ConstituencyId) VALUES(%s,%s,%s)",(pincode,city,result))
+	        #Commit to DB
+            mysql.connection.commit()
+    
         cur.close()
 
         
