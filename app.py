@@ -165,22 +165,22 @@ def logout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
+    # retrieve your user in another view
+    username = session['username']
+    # redirect to login using url_for to the login page if user mismatch or None
+
     #create cursor
     cur = mysql.connection.cursor()
-
     #get articles
-    result=cur.execute("SELECT * FROM Voter")
-
-    articles = cur.fetchall()
-
-    if result > 0:
-        return render_template('dashboard.html', articles=articles)
-    else:
-        msg= 'No Articles Found'
-        return render_template('dashboard.html',msg=msg)
+    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    user_details = cur.fetchone()
     
-    #close connection
+    pincode =  user_details['PinCode']
+    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    city_details = cur.fetchone()
     cur.close()
+    #if result > 0:
+    return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
 #Article form class
 class ArticleForm(Form):
