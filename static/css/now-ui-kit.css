@@ -297,6 +297,79 @@
  * These styles are required for noUiSlider to function.
  * You don't need to change these rules to apply your design.
  */
+.navbar-nav {
+    margin: 1px 0;
+  }
+  .navbar-nav .open .dropdown-menu > li > a {
+    padding: 15px 15px 5px 50px;
+  }
+  .navbar-nav .open .dropdown-menu > li:first-child > a {
+    padding: 5px 15px 5px 50px;
+  }
+  .navbar-nav .open .dropdown-menu > li:last-child > a {
+    padding: 15px 15px 25px 50px;
+  }
+  [class*="navbar-"] .navbar-nav > li > a,
+  [class*="navbar-"] .navbar-nav > li > a:hover,
+  [class*="navbar-"] .navbar-nav > li > a:focus,
+  [class*="navbar-"] .navbar-nav .active > a,
+  [class*="navbar-"] .navbar-nav .active > a:hover,
+  [class*="navbar-"] .navbar-nav .active > a:focus,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a:hover,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a:focus,
+  [class*="navbar-"] .navbar-nav .navbar-nav .open .dropdown-menu > li > a:active {
+    color: white;
+  }
+  [class*="navbar-"] .navbar-nav > li > a,
+  [class*="navbar-"] .navbar-nav > li > a:hover,
+  [class*="navbar-"] .navbar-nav > li > a:focus,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a:hover,
+  [class*="navbar-"] .navbar-nav .open .dropdown-menu > li > a:focus {
+    opacity: .7;
+    background: transparent;
+  }
+  [class*="navbar-"] .navbar-nav.navbar-nav .open .dropdown-menu > li > a:active {
+    opacity: 1;
+  }
+  [class*="navbar-"] .navbar-nav .dropdown > a:hover .caret {
+    border-bottom-color: #777;
+    border-top-color: #777;
+  }
+  [class*="navbar-"] .navbar-nav .dropdown > a:active .caret {
+    border-bottom-color: white;
+    border-top-color: white;
+  }
+  .dropdown-menu {
+    display: none;
+  }
+  .navbar-fixed-top {
+    -webkit-backface-visibility: hidden;
+  }
+    .navbar-collapse.collapse {
+    height: 100% !important;
+  }
+  .navbar-collapse.collapse.in {
+    display: block;
+  }
+  .navbar-header .collapse, .navbar-toggle {
+    display: block !important;
+  }
+  .navbar-header {
+    float: none;
+  }
+  .navbar-collapse .nav p {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .main-panel .navbar .navbar-collapse .navbar-nav .nav-item .nav-link p {
+    display: none;
+  }
+}
 
 .noUi-target,
 .noUi-target * {
