@@ -146,8 +146,8 @@ def register_candidate():
             #campare passwords
             if sha256_crypt.verify(password_candidate, password):
                 #passed
-                session['logged_in'] = True
-                session['username'] = username
+                # session['logged_in'] = True
+                # session['username'] = username
                 cursor =mysql.connection.cursor()
                 cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
                 data = cursor.fetchone()
@@ -157,8 +157,8 @@ def register_candidate():
                 mysql.connection.commit()
     
                 cursor.close()
-                flash('you are now succesfully applied as candidate and logged in', 'success')
-                return redirect(url_for('dashboard'))
+                flash('you are now succesfully applied as candidate and can login', 'success')
+                return redirect(url_for('login'))
             else:
                 flash('Invalid Credentials','danger')
                 return render_template('register_candidate.html',form=form)
@@ -187,7 +187,20 @@ def login():
         #craete cursor
 
         cur =mysql.connection.cursor()
+        result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
+        if result>0 :
+            cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+            data = cur.fetchone()
+            password = data['Password']
 
+            #campare passwords
+            if sha256_crypt.verify(password_candidate, password):
+                #passed
+                session['logged_in'] = True
+                session['username'] = username
+
+                flash('you are now logged in', 'success')
+                return redirect(url_for('dashboard_candidate'))
         #get user by username
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
@@ -255,11 +268,26 @@ def dashboard():
     #if result > 0:
     return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
-#Article form class
-class ArticleForm(Form):
-    title = StringField('Title',[validators.Length(min=1,max=200)])
-    body = TextAreaField('Body',[validators.Length(min=30)])
 
+@app.route('/dashboard_candidate')
+@is_logged_in
+def dashboard_candidate():
+    # retrieve your user in another view
+    username = session['username']
+    # redirect to login using url_for to the login page if user mismatch or None
+
+    #create cursor
+    cur = mysql.connection.cursor()
+    #get articles
+    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    user_details = cur.fetchone()
+    
+    pincode =  user_details['PinCode']
+    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    city_details = cur.fetchone()
+    cur.close()
+    #if result > 0:
+    return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
 
 if __name__ == '__main__':
     app.secret_key='secret123'
