@@ -27,8 +27,6 @@ rows = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
     "Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
     "Tripura","Uttarakhand","Uttar Pradesh","West Bengal"]
 
-candidates = []
-
 
 @app.route('/')
 def index():
@@ -311,7 +309,10 @@ def dashboard():
 def dashboard_voter():
     username = session['username']
     cur = mysql.connection.cursor()   
-    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    result= cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    if result == 0 :
+        flash('not valid user')
+        return redirect(url_for('logout'))
     user_details = cur.fetchone()
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
@@ -334,15 +335,9 @@ def dashboard_candidate():
     return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
 
 
-class Votingform(Form):
-    example = RadioField('Label', candidates )
-    
-
-
 @app.route('/vote_cast',methods=['GET','POST'])
 @is_logged_in
 def vote_cast():
-    form = Votingform
     username = session['username']
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
@@ -355,15 +350,9 @@ def vote_cast():
     city_details = cur.fetchone()
     constituency = city_details['ConstituencyId']
     cur.execute('SELECT * from Candidate where ConstituencyId=%s',[constituency])
-    data = cur.fetchall()
-    del candidates[:]
-    for x in data :
-        candidates.append(x['AadhaarNumber'])
-    if request.method == 'POST' and form.validate():
-        vote=form.example.data 
-        flash('vote casted succesfully')
-        return redirect(url_for('dashboard'))
-    return render_template('vote_cast.html',form=form)
+    candidates = cur.fetchall()
+    print candidates
+    return render_template('vote_cast.html',candidates=candidates )
 
 
 if __name__ == '__main__':

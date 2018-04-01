@@ -1,12 +1,22 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <h1>Register</h1>
-    {% from "includes/_formhelpers.html" import render_field %}
-    <form method='POST' action="">
-        <div class="form-group">
-            {{ form.example }}
-        </div>
-        <p><input type="submit" class="btn btn-primary" value="submit"</p>
-    </form>
+    <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
+    <hr>
+    <table class="table table-striped">
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th></th>
+        </tr>
+        {% for candidate in candidates %}
+            <tr>
+                <td>{{candidate.AadhaarNumber}}</td>
+                <td>{{candidate.PhotoLink}}</td>
+                <td>
+                 
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
