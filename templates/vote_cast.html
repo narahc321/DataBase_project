@@ -13,9 +13,8 @@
             <tr>
                 <td>{{candidate.AadhaarNumber}}</td>
                 <td>{{candidate.PhotoLink}}</td>
-                <td>
-                 
-                </td>
+                <td><a href="vote_candidate/{{candidate.AadhaarNumber}}" class="btn btn-default pull-right">Edit</a></td>
+                
             </tr>
         {% endfor %}
     </table>

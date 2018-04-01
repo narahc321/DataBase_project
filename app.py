@@ -355,6 +355,58 @@ def vote_cast():
     return render_template('vote_cast.html',candidates=candidates )
 
 
+class Votingform(Form):
+    password = PasswordField('Password',[validators.DataRequired()])
+
+
+@app.route('/vote_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
+@is_logged_in
+def vote_candidate(AadhaarNumber):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    candidate = cur.fetchone()
+    print candidate
+    print AadhaarNumber
+    form = Votingform(request.form)
+    username = session['username']
+    print -1
+    if request.method == 'POST' and form.validate():
+        password_voter = form.password.data
+        print -2
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+        if result>0 :
+            #get hash
+            data = cur.fetchone()
+            password = data['Password']
+            print 1
+            #campare passwords
+            if sha256_crypt.verify(password_voter, password):
+                print 2
+                #passed
+                session['logged_in'] = True
+                session['username'] = username
+                candidate_votes = candidate['NumberOfVotes'] + 1
+                candidate_aadhaar = candidate['AadhaarNumber']
+                print 3
+                cur.execute("UPDATE Candidate SET NumberOfVotes = %s WHERE AadhaarNumber = %s",(candidate_votes,candidate_aadhaar))
+                mysql.connection.commit()
+                cur.execute("UPDATE Voter SET VotingStatus = %s WHERE AadhaarNumber = %s",(1,username))
+                mysql.connection.commit()
+                flash('Voting Succeful', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                print 4
+                flash('Invalid login')
+                return redirect(url_for('logout'))
+            cur.close()
+        else:
+            print 5
+            flash('Username not found')
+            return redirect(url_for('logout'))
+
+    return render_template('vote_candidate.html',form=form)
+
+
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
