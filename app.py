@@ -134,8 +134,9 @@ def register_candidate():
         username = form.aadhaar_no.data
         state = form.state.data
         eduqua = form.eduqua.data
-        filename1 = photos.save(request.files['symbol'])
-        filename2 = photos.save(request.files['signature'])
+        PhotoLink = photos.save(request.files['symbol'])
+        SignatureLink = photos.save(request.files['signature'])
+        
         password_candidate = form.password.data
         cur =mysql.connection.cursor()
         #return filename1
@@ -159,7 +160,7 @@ def register_candidate():
                 cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
                 data = cursor.fetchone()
                 result = data['Id']
-                cursor.execute("INSERT INTO Candidate(AadhaarNumber,EduQua,ConstituencyId) VALUES(%s,%s,%s)",(username,eduqua,result))
+                cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,ConstituencyId) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,result))
 	            #Commit to DB
                 mysql.connection.commit()
     
@@ -271,13 +272,13 @@ def login():
                 flash('you are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login'
+                flash('Invalid login','danger')
                 return render_template('login.html', error = error)
             # cur close
             cur.close()
         else:
-            error = 'Username not found'
-            return render_template('login.html', error = error)
+            flash('Username not found','danger')
+            return render_template('login.html', form=form)
 
     return render_template('login.html',form=form)
 
