@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, DateField,SelectField
+from wtforms import Form, StringField, widgets, SelectMultipleField,TextAreaField, PasswordField, validators, RadioField, DateField,SelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
 from wtforms.fields.html5 import DateField
@@ -307,17 +307,10 @@ def dashboard():
 @app.route('/dashboard_voter')
 @is_logged_in
 def dashboard_voter():
-    # retrieve your user in another view
     username = session['username']
-    # redirect to login using url_for to the login page if user mismatch or None
-
-    #create cursor
-    cur = mysql.connection.cursor()
-    #get articles
-   
+    cur = mysql.connection.cursor()   
     cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
     user_details = cur.fetchone()
-    
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
@@ -328,22 +321,76 @@ def dashboard_voter():
 @app.route('/dashboard_candidate')
 @is_logged_in
 def dashboard_candidate():
-    # retrieve your user in another view
     username = session['username']
-    # redirect to login using url_for to the login page if user mismatch or None
-
-    #create cursor
     cur = mysql.connection.cursor()
-    #get articles
     cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
     user_details = cur.fetchone()
-    
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     cur.close()
-    #if result > 0:
     return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
+
+
+class Votingform(Form):
+    name = StringField('',[validators.Length(min=1,max=30)])
+    gender = RadioField(
+        'Gender?',
+        [validators.Required()],
+        choices=[('M', 'Male'), ('F', 'Female'),('F', 'Other')], default='M'
+    )
+    # dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
+    dob = DateField('', format='%Y-%m-%d')
+    aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
+    father_name = StringField('',[validators.Length(min=1,max=30)])
+    address = StringField('',[validators.Length(min=1,max=30)])
+    city = StringField('',[validators.Length(min=1,max=30)])
+    pincode = StringField('',[validators.Length(min=6,max=6)])
+    state = SelectField(label='state', 
+        choices=[(state, state) for state in rows])
+    phone = StringField('',[validators.Length(min=10,max=11)])
+    email_id = StringField('')
+    password = PasswordField('',[
+        validators.DataRequired(),
+        validators.EqualTo('confirm', message='passwords do not match')
+    ])
+    confirm = PasswordField('')
+
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+
+class SimpleForm(Form):
+    string_of_files = ['one','two','three']
+    list_of_files = string_of_files[0].split()
+    # create a list of value/description tuples
+    files = [(x, x) for x in list_of_files]
+    example = MultiCheckboxField('Label', choices=files)
+
+
+@app.route('/vote_cast', methods= ['GET','POST'])
+@is_logged_in
+def vote_cast():
+    form = SimpleForm()
+    if request.method == 'POST' and form.validate():
+        print form.example.data
+    else:
+        print form.errors
+    return render_template('vote_cast.html',form=form)
+    username = session['username']
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    user_details = cur.fetchone()
+    if user_details['VotingStatus'] == 1 :
+        flash('Already Casted Vote','danger')
+        return redirect(url_for('dashboard'))
+    pincode =  user_details['PinCode']
+    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    city_details = cur.fetchone()
+    constituency = city_details['ConstituencyId']
+    candidates = cur.execute('SELECT * from Candidate where ConstituencyId=%s',[constituency])
 
 if __name__ == '__main__':
     app.secret_key='secret123'
