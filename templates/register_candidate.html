@@ -53,7 +53,7 @@
                         <div class="container">
                             {% include 'includes/_messages.html' %}
                             {% from "includes/_formhelpers.html" import render_field %}
-                            <form method='POST' action="">
+                            <form method='POST' action="{{ url_for('register_candidate')}}" enctype=multipart/form-data>
                                 <div class="card-header card-header-rose card-header-icon">
                                     <div class="card-icon">
                                         <i class="material-icons">mail_outline</i>
@@ -79,7 +79,8 @@
                                     <label for="exampleEmail" class="bmd-label-floating">Password</label>
                                     {{render_field(form.password, class_ = "form-control")}}
                                 </div>
-                                
+                                <input type=file name= symbol ></br>
+                                <input type=file name= signature ></br>
                                 <p><input type="submit" class="btn btn-fill btn-rose" value="submit"</p>
                             </form>
                         </div>

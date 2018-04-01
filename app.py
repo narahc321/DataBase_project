@@ -6,6 +6,7 @@ from functools import wraps
 from wtforms.fields.html5 import DateField
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileField,FileAllowed,FileRequired
+from flask_uploads import UploadSet,configure_uploads,IMAGES 
 
 
 app = Flask(__name__)
@@ -16,6 +17,7 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'iiita123'
 app.config['MYSQL_DB'] = 'MobileVoting'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
 
 #init MYSQL
 mysql = MySQL(app)
@@ -36,6 +38,9 @@ def index():
 def about():
     return render_template('about.html')
 
+photos = UploadSet('photos',IMAGES)
+
+configure_uploads(app,photos)
 
 class Registerform(Form):
     name = StringField('',[validators.Length(min=1,max=30)])
@@ -125,12 +130,15 @@ class CandidateRegisterform(Form):
 @app.route('/register_candidate',methods=['GET','POST'])
 def register_candidate():
     form = CandidateRegisterform(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST' and 'symbol' in request.files  and 'signature' in request.files :
         username = form.aadhaar_no.data
         state = form.state.data
         eduqua = form.eduqua.data
+        filename1 = photos.save(request.files['symbol'])
+        filename2 = photos.save(request.files['signature'])
         password_candidate = form.password.data
         cur =mysql.connection.cursor()
+        #return filename1
         #get user by username
         result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
         if result > 0:
