@@ -119,7 +119,6 @@ class CandidateRegisterform(Form):
     aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
     state = state = SelectField(label='state', 
         choices=[(state, state) for state in rows])
-    symbol = FileField('image',validators=[FileRequired(),FileAllowed(['png','jpg'],'Only Images!')])
     eduqua = StringField('Edu*',[validators.Length(min=1,max=50)])
     password = PasswordField('',[validators.DataRequired()])
     
