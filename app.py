@@ -5,6 +5,7 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 from wtforms.fields.html5 import DateField
 from werkzeug.utils import secure_filename
+from flask_wtf.file import FileField,FileAllowed,FileRequired
 
 
 app = Flask(__name__)
@@ -118,6 +119,7 @@ class CandidateRegisterform(Form):
     aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
     state = state = SelectField(label='state', 
         choices=[(state, state) for state in rows])
+    symbol = FileField('image',validators=[FileRequired(),FileAllowed(['png','jpg'],'Only Images!')])
     eduqua = StringField('Edu*',[validators.Length(min=1,max=50)])
     password = PasswordField('',[validators.DataRequired()])
     
@@ -129,39 +131,29 @@ def register_candidate():
         state = form.state.data
         eduqua = form.eduqua.data
         password_candidate = form.password.data
-        print 1
         cur =mysql.connection.cursor()
-        print 2
         #get user by username
         result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
-        print result
         if result > 0:
             flash('Already a user! Try logging in','danger')
             return redirect(url_for('login'))
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
         #result = cur.execute("SELECT * FROM Voter")
-        print 3
-        print result
         if result>0 :
             #get hash
             data = cur.fetchone()
             password = data['Password']
-            print 4
             #campare passwords
             if sha256_crypt.verify(password_candidate, password):
-                print 5
                 #passed
                 session['logged_in'] = True
                 session['username'] = username
                 cursor =mysql.connection.cursor()
-                print 6
                 cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
                 data = cursor.fetchone()
-                print 7
                 result = data['Id']
                 cursor.execute("INSERT INTO Candidate(AadhaarNumber,EduQua,ConstituencyId) VALUES(%s,%s,%s)",(username,eduqua,result))
 	            #Commit to DB
-                print 8
                 mysql.connection.commit()
     
                 cursor.close()
@@ -263,25 +255,10 @@ def dashboard():
     #if result > 0:
     return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
-@app.route('/dashboard_candidate')
-@is_logged_in
-def dashboard_candidate():
-    # retrieve your user in another view
-    username = session['username']
-    # redirect to login using url_for to the login page if user mismatch or None
-
-    #create cursor
-    cur = mysql.connection.cursor()
-    #get articles
-    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
-    user_details = cur.fetchone()
-    
-    pincode =  user_details['PinCode']
-    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
-    city_details = cur.fetchone()
-    cur.close()
-    #if result > 0:
-    return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
+#Article form class
+class ArticleForm(Form):
+    title = StringField('Title',[validators.Length(min=1,max=200)])
+    body = TextAreaField('Body',[validators.Length(min=30)])
 
 
 if __name__ == '__main__':
