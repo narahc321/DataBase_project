@@ -293,10 +293,20 @@ def logout():
     flash('you are now logged out','success')
     return redirect(url_for('login'))
 
-
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
+    username = session['username']
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
+    cur.close()
+    if result > 0 :
+        return redirect(url_for('dashboard_candidate'))
+    return redirect(url_for('dashboard_voter'))
+
+@app.route('/dashboard_voter')
+@is_logged_in
+def dashboard_voter():
     # retrieve your user in another view
     username = session['username']
     # redirect to login using url_for to the login page if user mismatch or None
@@ -304,6 +314,7 @@ def dashboard():
     #create cursor
     cur = mysql.connection.cursor()
     #get articles
+   
     cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
     user_details = cur.fetchone()
     
@@ -311,7 +322,6 @@ def dashboard():
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     cur.close()
-    #if result > 0:
     return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
 

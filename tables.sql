@@ -76,3 +76,10 @@ INSERT INTO Constituency (STATE) VALUES("West Bengal");
 
 alter table City 
 ADD column city varchar(30) after PinCode;
+
+
+ALTER TABLE `MobileVoting`.`Voter` 
+ADD COLUMN `VotingStatus` INT NULL DEFAULT 0 AFTER `Password`;
+
+ALTER TABLE `MobileVoting`.`Candidate` 
+ADD COLUMN `NumberOfVotes` INT NULL DEFAULT 0 AFTER `ConstituencyId`;
