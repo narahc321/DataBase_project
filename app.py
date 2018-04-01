@@ -171,6 +171,53 @@ def register_candidate():
     return render_template('register_candidate.html',form=form)
 
 
+@app.route('/reg_candidate',methods=['GET','POST'])
+def reg_candidate():
+    form = CandidateRegisterform(request.form)
+    if request.method == 'POST' and form.validate():
+        username = form.aadhaar_no.data
+        state = form.state.data
+        eduqua = form.eduqua.data
+        password_candidate = form.password.data
+        cur =mysql.connection.cursor()
+        #get user by username
+        result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
+        if result > 0:
+            flash('Already a user! Try logging in','danger')
+            return redirect(url_for('login'))
+        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+        #result = cur.execute("SELECT * FROM Voter")
+        if result>0 :
+            #get hash
+            data = cur.fetchone()
+            password = data['Password']
+            #campare passwords
+            if sha256_crypt.verify(password_candidate, password):
+                #passed
+                # session['logged_in'] = True
+                # session['username'] = username
+                cursor =mysql.connection.cursor()
+                cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
+                data = cursor.fetchone()
+                result = data['Id']
+                cursor.execute("INSERT INTO Candidate(AadhaarNumber,EduQua,ConstituencyId) VALUES(%s,%s,%s)",(username,eduqua,result))
+	            #Commit to DB
+                mysql.connection.commit()
+    
+                cursor.close()
+                flash('you are now succesfully applied as candidate and can login', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('Invalid Credentials','danger')
+                return render_template('reg_candidate.html',form=form)
+            # cur close
+            cur.close()
+        else:
+            flash('Should be registered as voter','danger')
+            return render_template('reg_candidate.html',form=form)
+
+    return render_template('reg_candidate.html',form=form)
+
 class Loginform(Form):
     aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
     password = PasswordField('',[validators.DataRequired()])
