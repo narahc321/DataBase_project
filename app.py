@@ -7,9 +7,11 @@ from wtforms.fields.html5 import DateField
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileField,FileAllowed,FileRequired
 from flask_uploads import UploadSet,configure_uploads,IMAGES 
-
+from flask_recaptcha import ReCaptcha
+from flask_wtf import RecaptchaField
 
 app = Flask(__name__)
+
 
 # config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
@@ -18,6 +20,9 @@ app.config['MYSQL_PASSWORD'] = 'iiita123'
 app.config['MYSQL_DB'] = 'MobileVoting'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
+app.config['RECAPTCHA_PUBLIC_KEY'] = '6LeGolAUAAAAANEcOrlm1_SBbAqbUtHEm_-ImdAK'
+app.config['RECAPTCHA_PRIVATE_KEY'] = '6LeGolAUAAAAAOSbI3-pRhY_QuaRZgvUJtEJScJQ'
+
 
 #init MYSQL
 mysql = MySQL(app)
@@ -65,6 +70,7 @@ class Registerform(Form):
         validators.EqualTo('confirm', message='passwords do not match')
     ])
     confirm = PasswordField('')
+    recaptcha =RecaptchaField()
 
 @app.route('/register',methods=['GET','POST'])
 def register():
