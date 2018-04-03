@@ -83,3 +83,6 @@ ADD COLUMN `VotingStatus` INT NULL DEFAULT 0 AFTER `Password`;
 
 ALTER TABLE `MobileVoting`.`Candidate` 
 ADD COLUMN `NumberOfVotes` INT NULL DEFAULT 0 AFTER `ConstituencyId`;
+
+ALTER TABLE `MobileVoting`.`Candidate` 
+ADD COLUMN `Validate` INT NULL DEFAULT 0 AFTER `NumberOfVotes`;

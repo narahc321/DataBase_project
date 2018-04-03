@@ -47,7 +47,7 @@ class Registerform(Form):
     gender = RadioField(
         'Gender?',
         [validators.Required()],
-        choices=[('M', 'Male'), ('F', 'Female'),('F', 'Other')], default='M'
+        choices=[('Male', 'Male'), ('Female', 'Female'),('Other', 'Other')], default='Male'
     )
     # dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
     dob = DateField('', format='%Y-%m-%d')
@@ -226,10 +226,37 @@ def reg_candidate():
 
     return render_template('reg_candidate.html',form=form)
 
+@app.route('/edit_voter',methods=['GET','POST'])
+def edit_voter() :
+    session_type =session['type']
+    print session_type
+    if session_type != 'C' and session_type != 'V' :
+        flash('Not a valid User,Try to login in')
+        return redirect(url_for('logout'))
+    form = Registerform(request.form)
+    username = session['username']
+    cur = mysql.connection.cursor()
+    result = cur.execute('SELECT * FROM Voter WHERE AadhaarNumber = %s',[username])
+    if result <= 0:
+        print result
+        flash('Not a valid User,Try to login in')
+        return redirect(url_for('logout'))
+    data = cur.fetchone()
+    form.name.data = data['Name']
+    form.gender.data = data['Gender']
+    form.dob.data = data['DateOfBirth']
+    form.aadhaar_no.data = data['AadhaarNumber']
+    form.father_name.data  = data['FatherName']
+    form.address.data = data['Address']
+    form.pincode.data = data['PinCode']
+    form.phone.data = data['MobileNumber']
+    form.email_id.data = data['EmailId']
+    return render_template('edit_voter.html',form=form)
+
+
 class Loginform(Form):
     aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
     password = PasswordField('',[validators.DataRequired()])
-
 
 #user login
 @app.route('/login',methods=['GET','POST'])
@@ -253,7 +280,7 @@ def login():
                 #passed
                 session['logged_in'] = True
                 session['username'] = username
-
+                session['type']= 'C'
                 flash('you are now logged in', 'success')
                 return redirect(url_for('dashboard_candidate'))
         #get user by username
@@ -268,12 +295,12 @@ def login():
                 #passed
                 session['logged_in'] = True
                 session['username'] = username
-
+                session['type']= 'V'
                 flash('you are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid login','danger')
-                return render_template('login.html', error = error)
+                return render_template('login.html')
             # cur close
             cur.close()
         else:
@@ -281,6 +308,34 @@ def login():
             return render_template('login.html', form=form)
 
     return render_template('login.html',form=form)
+
+@app.route('/login_electionofficer',methods=['GET','POST'])
+def login_electionofficer():
+    form =Loginform(request.form)
+    if request.method == 'POST' and form.validate():
+        username = form.aadhaar_no.data
+        password_candidate = form.password.data
+        cur =mysql.connection.cursor()
+        result = cur.execute("SELECT * FROM ElectionOfficer WHERE AadhaarNumber=%s",[username])
+        if result>0 :
+            data = cur.fetchone()
+            password = data['Password']
+            if sha256_crypt.verify(password_candidate, password):
+                session['logged_in'] = True
+                session['username'] = username
+                session['type'] = 'E'
+                flash('you are now logged in', 'success')
+                return redirect(url_for('dashboard_electionofficer'))
+            else:
+                flash('Invalid login','danger')
+                return redirect(url_for('/login_electionofficer'))
+            # cur close
+            cur.close()
+        else:
+            flash('Username not found','danger')
+            return redirect(url_for('/login_electionofficer'))
+
+    return render_template('login_electionofficer.html',form=form)
 
 # check if user logged in
 def is_logged_in(f):
@@ -302,17 +357,34 @@ def logout():
     flash('you are now logged out','success')
     return redirect(url_for('login'))
 
+@app.route('/withdraw')
+@is_logged_in
+def withdraw():
+    if session['type'] != 'C' :
+        flash('Invalid User')
+        return redirect(url_for('logout'))
+    cur = mysql.connection.cursor()
+    username = session['username']
+    cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
+    mysql.connection.commit()
+    cur.close()
+    session['type'] = 'V'
+
+    flash('you have succesfully withdrawn','success')
+    return redirect(url_for('dashboard'))
+
+
+
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
-    username = session['username']
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
-    cur.close()
-    if result > 0 :
+    session_type = session['type']
+    if session_type =='E' :
+        return redirect(url_for('dashboard_electionofficer'))
+    if session_type =='C' :
         return redirect(url_for('dashboard_candidate'))
     return redirect(url_for('dashboard_voter'))
-
+    
 @app.route('/dashboard_voter')
 @is_logged_in
 def dashboard_voter():
@@ -336,6 +408,24 @@ def dashboard_candidate():
     username = session['username']
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+    user_details = cur.fetchone()
+    pincode =  user_details['PinCode']
+    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    city_details = cur.fetchone()
+    cur.close()
+    return render_template('dashboard_candidate.html', user_details=user_details,city_details=city_details )
+
+
+@app.route('/dashboard_electionofficer')
+@is_logged_in
+def dashboard_electionofficer():
+    session_type = session['type']
+    if session_type != 'E' :
+         flash('Not a valid User')
+         return redirect(url_for('logout'))
+    username = session['username']
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Voter WHERE ElectionOfficer=%s",[username])
     user_details = cur.fetchone()
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
@@ -378,22 +468,15 @@ def vote_candidate(AadhaarNumber):
     print AadhaarNumber
     form = Votingform(request.form)
     username = session['username']
-    print -1
     if request.method == 'POST' and form.validate():
         password_voter = form.password.data
-        print -2
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
-            #get hash
             data = cur.fetchone()
             password = data['Password']
-            print 1
-            #campare passwords
             if sha256_crypt.verify(password_voter, password):
-                print 2
-                #passed
-                session['logged_in'] = True
-                session['username'] = username
+                #session['logged_in'] = True
+                #session['username'] = username
                 candidate_votes = candidate['NumberOfVotes'] + 1
                 candidate_aadhaar = candidate['AadhaarNumber']
                 print 3
