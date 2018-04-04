@@ -70,12 +70,12 @@ class Registerform(Form):
         validators.EqualTo('confirm', message='passwords do not match')
     ])
     confirm = PasswordField('')
-    recaptcha =RecaptchaField()
+    # recaptcha =RecaptchaField()
 
 @app.route('/register',methods=['GET','POST'])
 def register():
     form =Registerform(request.form)
-    if request.method == 'POST' and form.validate():
+    if form.validate():
         name = form.name.data
         gender = form.gender.data
         # dob = form.dob.data

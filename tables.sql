@@ -74,9 +74,6 @@ INSERT INTO Constituency (STATE) VALUES("Uttarakhand");
 INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
 
-alter table City 
-ADD column city varchar(30) after PinCode;
-
 
 ALTER TABLE `MobileVoting`.`Voter` 
 ADD COLUMN `VotingStatus` INT NULL DEFAULT 0 AFTER `Password`;
@@ -86,3 +83,22 @@ ADD COLUMN `NumberOfVotes` INT NULL DEFAULT 0 AFTER `ConstituencyId`;
 
 ALTER TABLE `MobileVoting`.`Candidate` 
 ADD COLUMN `Validate` INT NULL DEFAULT 0 AFTER `NumberOfVotes`;
+
+ALTER TABLE `MobileVoting`.`Constituency` 
+ADD COLUMN `StartStop` INT NULL DEFAULT 0 AFTER `Id`;
+
+ALTER TABLE `MobileVoting`.`ElectionOfficer` 
+ADD COLUMN `Password` VARCHAR(45) NULL AFTER `Constituency`;
+
+ALTER TABLE `MobileVoting`.`Voter` 
+ADD INDEX `FK_pincode_idx` (`PinCode` ASC);
+ALTER TABLE `MobileVoting`.`Voter` 
+ADD CONSTRAINT `FK_pincode`
+  FOREIGN KEY (`PinCode`)
+  REFERENCES `MobileVoting`.`City` (`PinCode`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+SELECT * FROM Candidate where ConstituencyId = 23 order by NumberOfVotes DESC;
+

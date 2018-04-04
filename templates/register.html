@@ -9,6 +9,8 @@
         <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
         <link rel="stylesheet" href="../static/css/material-dashboard.css?v=2.0.1">
         <link href="../static/assets-for-demo/demo.css" rel="stylesheet" />
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+
         <!-- <link rel="stylesheet" type="text/css" href="../static/styleregister.css">
  -->
     </head>
@@ -54,7 +56,7 @@
                         <div class="container">
                             {% include 'includes/_messages.html' %}
                             {% from "includes/_formhelpers.html" import render_field %}
-                            <form method='POST' action="">
+                            <form method='POST' action="{{ url_for('register') }}">
                                 <div class="card-header card-header-rose card-header-icon">
                                     <div class="card-icon">
                                         <i class="material-icons">mail_outline</i>
@@ -112,7 +114,7 @@
                                     <label for="exampleEmail" class="bmd-label-floating">Confirm Password</label>
                                     {{render_field(form.confirm, class_ = "form-control")}}
                                 </div>
-                                {{ form.recaptcha }}
+                                <!-- {{ form.recaptcha }} -->
                                 <p><input type="submit" class="btn btn-fill btn-rose" value="submit"</p>
                             </form>
                         </div>
