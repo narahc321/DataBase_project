@@ -114,6 +114,10 @@
                                     <label for="exampleEmail" class="bmd-label-floating">Confirm Password</label>
                                     {{render_field(form.confirm, class_ = "form-control")}}
                                 </div>
+                                {% for error in form.recaptcha.errors %}
+                                     {{ error }}
+                                {% endfor %}
+                                {{ form.recaptcha }}
                                 <!-- {{ form.recaptcha }} -->
                                 <p><input type="submit" class="btn btn-fill btn-rose" value="submit"</p>
                             </form>

@@ -70,12 +70,13 @@ class Registerform(Form):
         validators.EqualTo('confirm', message='passwords do not match')
     ])
     confirm = PasswordField('')
+    recaptcha = RecaptchaField()
     # recaptcha =RecaptchaField()
 
 @app.route('/register',methods=['GET','POST'])
 def register():
     form =Registerform(request.form)
-    if form.validate():
+    if  request.method =='POST' and form.validate():
         name = form.name.data
         gender = form.gender.data
         # dob = form.dob.data
@@ -89,7 +90,7 @@ def register():
         phone = form.phone.data
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
-	
+        # recaptcha = RecaptchaField()
         cur =mysql.connection.cursor()
 
         #get user by username
@@ -97,12 +98,6 @@ def register():
         if result>0 :
             error = 'Already a user! Try logging in'
             return render_template('login.html', error = error)
-        
-        #execute query
-        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
-	
-        #Commit to DB
-        mysql.connection.commit()
         result = cur.execute("SELECT * FROM Constituency WHERE State=%s",[state])
         if result>0 :
             data = cur.fetchone()
@@ -115,6 +110,13 @@ def register():
             cur.execute("INSERT INTO City(PinCode,city,ConstituencyId) VALUES(%s,%s,%s)",(pincode,city,result))
 	        #Commit to DB
             mysql.connection.commit()
+        
+        #execute query
+        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
+	
+        #Commit to DB
+        mysql.connection.commit()
+       
     
         cur.close()
 
