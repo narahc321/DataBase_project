@@ -9,6 +9,7 @@ from flask_wtf.file import FileField,FileAllowed,FileRequired
 from flask_uploads import UploadSet,configure_uploads,IMAGES 
 from flask_recaptcha import ReCaptcha
 from flask_wtf import RecaptchaField
+from wtforms import ValidationError
 
 app = Flask(__name__)
 
@@ -48,30 +49,33 @@ photos = UploadSet('photos',IMAGES)
 configure_uploads(app,photos)
 
 class Registerform(Form):
-    name = StringField('',[validators.Length(min=1,max=30)])
+    name = StringField('',[validators.Required(), validators.Regexp('^[a-zA-Z\s]+$', message="Username must contain only letters numbers or underscore"),validators.Length(min=1,max=30)])
     gender = RadioField(
         'Gender?',
-        [validators.Required()],
+        [validators.DataRequired()],
         choices=[('Male', 'Male'), ('Female', 'Female'),('Other', 'Other')], default='Male'
     )
-    # dob = StringField('Date of Birth(YYYY-MM-DD)*',[validators.Length(min=10,max=10)])
-    dob = DateField('', format='%Y-%m-%d')
-    aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
-    father_name = StringField('',[validators.Length(min=1,max=30)])
-    address = StringField('',[validators.Length(min=1,max=30)])
-    city = StringField('',[validators.Length(min=1,max=30)])
-    pincode = StringField('',[validators.Length(min=6,max=6)])
-    state = SelectField(label='state', 
-        choices=[(state, state) for state in rows])
-    phone = StringField('',[validators.Length(min=10,max=11)])
-    email_id = StringField('')
+    dob = DateField('', format='%Y-%m-%d',)
+    # def validate_dob(form, field):
+    #     cur = datetime.year()
+    #     age = cur - field.data
+    #     age =age/365
+    #     if age < 18:
+    #         raise ValidationError('Invalid Age.')
+        
+    aadhaar_no = StringField('',[validators.Required(),validators.Length(min=12,max=12),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
+    # city = StringField('',[validators.Length(min=1,max=30)])
+    pincode = StringField('',[validators.Required(),validators.Length(min=6,max=6),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
+    # state = SelectField(label='state', 
+        # choices=[(state, state) for state in rows])
+    phone = StringField('',[validators.Required(),validators.Length(min=10,max=11),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
+    email_id = StringField('',[validators.Optional(),validators.Email()])
     password = PasswordField('',[
-        validators.DataRequired(),
-        validators.EqualTo('confirm', message='passwords do not match')
+        validators.DataRequired(),validators.Regexp(regex=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])', message="Password must contain atleast one lowercase letter ,one uppercase letter and one number"),
+        validators.length(min=6,max=20),validators.EqualTo('confirm', message='passwords do not match')
     ])
     confirm = PasswordField('')
     recaptcha = RecaptchaField()
-    # recaptcha =RecaptchaField()
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -82,48 +86,25 @@ def register():
         # dob = form.dob.data
         dob = form.dob.data.strftime('%Y-%m-%d')
         aadhaar_no = form.aadhaar_no.data
-        father_name = form.father_name.data
-        address = form.address.data
-        city = form.city.data
+        # father_name = form.father_name.data
+        # address = form.address.data
+        # city = form.city.data
         pincode = form.pincode.data
-        state = form.state.data
+        # state = form.state.data
         phone = form.phone.data
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
-        # recaptcha = RecaptchaField()
         cur =mysql.connection.cursor()
 
-        #get user by username
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
         if result>0 :
-            error = 'Already a user! Try logging in'
-            return render_template('login.html', error = error)
-        result = cur.execute("SELECT * FROM Constituency WHERE State=%s",[state])
-        if result>0 :
-            data = cur.fetchone()
-            print data
-            result = data['Id']
+            flash('Already a user! Try logging in','danger')
+            return redirect(url_for('login'))
         
-        number = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
-        if number<=0 :
-            #cur = mysql.connection.cursor()
-            cur.execute("INSERT INTO City(PinCode,city,ConstituencyId) VALUES(%s,%s,%s)",(pincode,city,result))
-	        #Commit to DB
-            mysql.connection.commit()
-        
-        #execute query
-        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, FatherName, Address, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, father_name, address, pincode, phone, email_id, password))
-	
-        #Commit to DB
+        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, pincode, phone, email_id, password))
         mysql.connection.commit()
-       
-    
         cur.close()
-
-        
-
         flash('you are now registered and can log in', 'success')
-
         return redirect(url_for('login'))
     return render_template('register.html',form=form)
 
@@ -455,8 +436,8 @@ def vote_cast():
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
-    constituency = city_details['ConstituencyId']
-    cur.execute('SELECT * from Candidate where ConstituencyId=%s',[constituency])
+    constituency = city_details['State']
+    cur.execute('SELECT * from Candidate where State=%s',[constituency])
     candidates = cur.fetchall()
     print candidates
     return render_template('vote_cast.html',candidates=candidates )

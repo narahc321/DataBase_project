@@ -79,31 +79,15 @@
                                     {{render_field(form.aadhaar_no, class_ = "form-control")}}
                                 </div>
                                 <div class="form-group aa">
-                                    <label for="exampleEmail" class="bmd-label-floating">Father's Name</label>
-                                    {{render_field(form.father_name, class_ = "form-control")}}
-                                </div>
-                                <div class="form-group aa">
-                                    <label for="exampleEmail" class="bmd-label-floating">Address</label>
-                                    {{render_field(form.address, class_ = "form-control")}}
-                                </div>
-                                <div class="form-group aa">
-                                    <label for="exampleEmail" class="bmd-label-floating">City</label>
-                                    {{render_field(form.city, class_ = "form-control")}}
-                                </div>
-                                <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Pincode</label>
                                     {{render_field(form.pincode, class_ = "form-control")}}
-                                </div>
-                                <div class="form-group aa">
-                                    <label for="exampleEmail" class="bmd-label-floating">State</label>
-                                    {{render_field(form.state, class_ = "form-control")}}
                                 </div>
                                 <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Mobile Number</label>
                                     {{render_field(form.phone, class_ = "form-control")}}
                                 </div>
                                 <div class="form-group aa">
-                                    <label for="exampleEmail" class="bmd-label-floating">Email ID</label>
+                                    <label for="exampleEmail" class="bmd-label-floating">Email ID (Optional)</label>
                                     {{render_field(form.email_id, class_ = "form-control")}}
                                 </div>
                                 <div class="form-group aa">
@@ -114,11 +98,10 @@
                                     <label for="exampleEmail" class="bmd-label-floating">Confirm Password</label>
                                     {{render_field(form.confirm, class_ = "form-control")}}
                                 </div>
-                                {% for error in form.recaptcha.errors %}
+                                <!-- {% for error in form.recaptcha.errors %}
                                      {{ error }}
-                                {% endfor %}
+                                {% endfor %} -->
                                 {{ form.recaptcha }}
-                                <!-- {{ form.recaptcha }} -->
                                 <p><input type="submit" class="btn btn-fill btn-rose" value="submit"</p>
                             </form>
                         </div>
@@ -127,10 +110,7 @@
             </div>
         </div>
     </div>    
-        <script src="//cdn.ckeditor.com/4.9.0/standard/ckeditor.js"></script>
-        <script type="text/javascript">
-            CKEDITOR.replace('editor')
-        </script>
+      
     </body>
 <script type="text/javascript" src = "../static/js/jquery-3.3.1.min.js"></script>
 <!-- <script src="../static/js/core/jquery.min.js"></script>
