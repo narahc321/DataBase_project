@@ -28,12 +28,7 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = '6LeGolAUAAAAAOSbI3-pRhY_QuaRZgvUJtEJScJQ'
 #init MYSQL
 mysql = MySQL(app)
 
-rows = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
-    "Goa","Gujarat","Haryana","Himachal Pradesh","Jammu And Kashmir",
-    "Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
-    "Manipur","Meghalaya","Mizoram","Nagaland","Odisha",
-    "Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
-    "Tripura","Uttarakhand","Uttar Pradesh","West Bengal"]
+rows = []
 
 
 @app.route('/')
@@ -49,7 +44,7 @@ photos = UploadSet('photos',IMAGES)
 configure_uploads(app,photos)
 
 class Registerform(Form):
-    name = StringField('',[validators.Required(), validators.Regexp('^[a-zA-Z\s]+$', message="Username must contain only letters numbers or underscore"),validators.Length(min=1,max=30)])
+    name = StringField('',[validators.Required(), validators.Regexp(regex=r'^[a-zA-Z\s]+$', message="Username must contain only letters numbers or underscore"),validators.Length(min=1,max=30)])
     gender = RadioField(
         'Gender?',
         [validators.DataRequired()],
@@ -100,7 +95,10 @@ def register():
         if result>0 :
             flash('Already a user! Try logging in','danger')
             return redirect(url_for('login'))
-        
+        result = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+        if result == 0:
+            flash('Not a Valid Pincode','danger')
+            return render_template('register.html',form=form)
         cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, pincode, phone, email_id, password))
         mysql.connection.commit()
         cur.close()
@@ -109,15 +107,47 @@ def register():
     return render_template('register.html',form=form)
 
 
+# check if user logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
 class CandidateRegisterform(Form):
-    aadhaar_no = StringField('',[validators.Length(min=12,max=16)])
+    aadhaar_no = StringField('',[validators.Required(),validators.Length(min=12,max=12),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
     state = state = SelectField(label='state', 
         choices=[(state, state) for state in rows])
     eduqua = StringField('Edu*',[validators.Length(min=1,max=50)])
     password = PasswordField('',[validators.DataRequired()])
     
 @app.route('/register_candidate',methods=['GET','POST'])
+@is_logged_in
 def register_candidate():
+    if session['type'] == 'C' :
+        flash('Already Registerd as Candidate')
+        return redirect(url_for('dashboard'))
+    if session['type'] != 'V' :
+        flash('Unauthorized, please login', 'danger')
+        return redirect(url_for('logout'))
+    del rows[:]
+    print rows
+    cur =mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM Constituency WHERE StartStopNomination= 0")
+    if result == 0 :
+        flash('Nominations are not Open for any state','danger')
+        return redirect(url_for('dashboard'))
+    
+    data = cur.fetchall()
+
+    for state in data :
+        print state['State']
+        rows.append(state['State'])
+    # print rows
     form = CandidateRegisterform(request.form)
     if request.method == 'POST' and 'symbol' in request.files  and 'signature' in request.files :
         username = form.aadhaar_no.data
@@ -128,8 +158,6 @@ def register_candidate():
         
         password_candidate = form.password.data
         cur =mysql.connection.cursor()
-        #return filename1
-        #get user by username
         result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
         if result > 0:
             flash('Already a user! Try logging in','danger')
@@ -168,53 +196,6 @@ def register_candidate():
     return render_template('register_candidate.html',form=form)
 
 
-@app.route('/reg_candidate',methods=['GET','POST'])
-def reg_candidate():
-    form = CandidateRegisterform(request.form)
-    if request.method == 'POST' and form.validate():
-        username = form.aadhaar_no.data
-        state = form.state.data
-        eduqua = form.eduqua.data
-        password_candidate = form.password.data
-        cur =mysql.connection.cursor()
-        #get user by username
-        result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
-        if result > 0:
-            flash('Already a user! Try logging in','danger')
-            return redirect(url_for('login'))
-        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
-        #result = cur.execute("SELECT * FROM Voter")
-        if result>0 :
-            #get hash
-            data = cur.fetchone()
-            password = data['Password']
-            #campare passwords
-            if sha256_crypt.verify(password_candidate, password):
-                #passed
-                # session['logged_in'] = True
-                # session['username'] = username
-                cursor =mysql.connection.cursor()
-                cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
-                data = cursor.fetchone()
-                result = data['Id']
-                cursor.execute("INSERT INTO Candidate(AadhaarNumber,EduQua,ConstituencyId) VALUES(%s,%s,%s)",(username,eduqua,result))
-	            #Commit to DB
-                mysql.connection.commit()
-    
-                cursor.close()
-                flash('you are now succesfully applied as candidate and can login', 'success')
-                return redirect(url_for('login'))
-            else:
-                flash('Invalid Credentials','danger')
-                return render_template('reg_candidate.html',form=form)
-            # cur close
-            cur.close()
-        else:
-            flash('Should be registered as voter','danger')
-            return render_template('reg_candidate.html',form=form)
-
-    return render_template('reg_candidate.html',form=form)
-
 @app.route('/edit_voter',methods=['GET','POST'])
 def edit_voter() :
     session_type =session['type']
@@ -235,8 +216,6 @@ def edit_voter() :
     form.gender.data = data['Gender']
     form.dob.data = data['DateOfBirth']
     form.aadhaar_no.data = data['AadhaarNumber']
-    form.father_name.data  = data['FatherName']
-    form.address.data = data['Address']
     form.pincode.data = data['PinCode']
     form.phone.data = data['MobileNumber']
     form.email_id.data = data['EmailId']
@@ -326,22 +305,12 @@ def login_electionofficer():
 
     return render_template('login_electionofficer.html',form=form)
 
-# check if user logged in
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, please login', 'danger')
-            return redirect(url_for('login'))
-    return wrap
-
 
 #logout
 @app.route('/logout')
 @is_logged_in
 def logout():
+    # print rows
     session.clear()
     flash('you are now logged out','success')
     return redirect(url_for('login'))
