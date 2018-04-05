@@ -169,3 +169,6 @@ INSERT INTO Constituency (STATE) VALUES("WEST BENGAL");
 
 ALTER TABLE `MobileVoting`.`Voter` 
 CHANGE COLUMN `PinCode` `PinCode` INT NULL DEFAULT NULL ;
+
+ALTER TABLE `MobileVoting`.`ElectionOfficer` 
+CHANGE COLUMN `AadhaarNumber` `UserID` VARCHAR(50) NOT NULL ;
