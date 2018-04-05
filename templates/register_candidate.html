@@ -67,7 +67,12 @@
                                 </div>
                                 <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Select the Constituency</label>
-                                    {{render_field(form.state, class_ = "form-control")}}
+                                    <input list="states" name="states"/>
+                                    <datalist id="states">
+                                        {% for state in rows %}
+                                        <option value="{{state}}" >
+                                        {% endfor %}
+                                    </datalist>
                                 </div>
                                 <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Educational Qualifications</label>

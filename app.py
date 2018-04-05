@@ -120,8 +120,8 @@ def is_logged_in(f):
 
 class CandidateRegisterform(Form):
     aadhaar_no = StringField('',[validators.Required(),validators.Length(min=12,max=12),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
-    state = state = SelectField(label='state', 
-        choices=[(state, state) for state in rows])
+    # state = state = StringField(label='state', 
+        # choices=[(state, state) for state in rows])
     eduqua = StringField('Edu*',[validators.Length(min=1,max=50)])
     password = PasswordField('',[validators.DataRequired()])
     
@@ -141,21 +141,21 @@ def register_candidate():
     if result == 0 :
         flash('Nominations are not Open for any state','danger')
         return redirect(url_for('dashboard'))
-    
     data = cur.fetchall()
 
     for state in data :
-        print state['State']
+        # print state['State']
         rows.append(state['State'])
-    # print rows
+    print rows
     form = CandidateRegisterform(request.form)
     if request.method == 'POST' and 'symbol' in request.files  and 'signature' in request.files :
         username = form.aadhaar_no.data
-        state = form.state.data
+        state = request.form.get("states")
+        print(state)
+        print("DSF")
         eduqua = form.eduqua.data
         PhotoLink = photos.save(request.files['symbol'])
         SignatureLink = photos.save(request.files['signature'])
-        
         password_candidate = form.password.data
         cur =mysql.connection.cursor()
         result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
@@ -173,27 +173,26 @@ def register_candidate():
                 #passed
                 # session['logged_in'] = True
                 # session['username'] = username
-                cursor =mysql.connection.cursor()
-                cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
-                data = cursor.fetchone()
-                result = data['Id']
-                cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,ConstituencyId) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,result))
+                # cursor =mysql.connection.cursor()
+                # cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
+                # data = cursor.fetchone()
+                # result = data['Id']
+                # cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,ConstituencyId) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,result))
 	            #Commit to DB
-                mysql.connection.commit()
+                # mysql.connection.commit()
     
-                cursor.close()
+                # cursor.close()
                 flash('you are now succesfully applied as candidate and can login', 'success')
                 return redirect(url_for('login'))
             else:
                 flash('Invalid Credentials','danger')
-                return render_template('register_candidate.html',form=form)
+                return render_template('register_candidate.html',form=form, rows = rows)
             # cur close
             cur.close()
         else:
             flash('Should be registered as voter','danger')
-            return render_template('register_candidate.html',form=form)
-
-    return render_template('register_candidate.html',form=form)
+            return render_template('register_candidate.html',form=form, rows = rows)
+    return render_template('register_candidate.html',form=form, rows = rows)
 
 
 @app.route('/edit_voter',methods=['GET','POST'])
