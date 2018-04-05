@@ -67,12 +67,11 @@
                                 </div>
                                 <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Select the Constituency</label>
-                                    <input list="states" name="states"/>
-                                    <datalist id="states">
+                                    <select id = "states" name="states"/>
                                         {% for state in rows %}
-                                        <option value="{{state}}" >
-                                        {% endfor %}
-                                    </datalist>
+                                        <option value="{{state}}">{{state}}</option>
+                                        {% endfor %} 
+                                    </select>
                                 </div>
                                 <div class="form-group aa">
                                     <label for="exampleEmail" class="bmd-label-floating">Educational Qualifications</label>
