@@ -155,10 +155,7 @@ def register_candidate():
             password = data['Password']
             if sha256_crypt.verify(password_candidate, password):
                 cursor =mysql.connection.cursor()
-                cursor.execute("SELECT * FROM Constituency WHERE State=%s",[state])
-                data = cursor.fetchone()
-                result = data['ID']
-                cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,ConstituencyId) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,result))
+                cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,Constituency) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,state))
                 mysql.connection.commit()
                 cursor.close()
                 session['type']='C'
@@ -360,7 +357,7 @@ def vote_cast():
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     constituency = city_details['State']
-    cur.execute('SELECT * from Candidate where State=%s',[constituency])
+    cur.execute('SELECT * from Candidate where Constituency=%s',[constituency])
     candidates = cur.fetchall()
     return render_template('vote_cast.html',candidates=candidates )
 
@@ -459,6 +456,39 @@ def StartStop_nominations():
     cur.close()
     flash('Sucess', 'success')
     return redirect(url_for('dashboard'))
+
+@app.route('/validate_candidates', methods=['GET','POST'])
+@is_logged_in
+def validate_candidates():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    data = cur.fetchone()
+    constituency = data['Constituency']
+    cur.execute("SELECT AadhaarNumber, Validate FROM Candidate WHERE Constituency = %s ",[constituency])
+    candidates =cur.fetchall()
+    cur.close()
+    return render_template('validate_candidates.html',candidates = candidates)
+    return redirect(url_for('dashboard'))
+
+@app.route('/validate_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
+@is_logged_in
+def edit_article(AadhaarNumber):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * from articles WHERE id= %s",[id])
+    article = cur.fetchone()
+    form = ArticleForm(request.form)
+    form.title.data = article['title']
+    form.body.data = article['body']
+    if request.method == 'POST' and form.validate():
+        title = request.form['title']
+        body = request.form['body']
+        cur =mysql.connection.cursor()
+        cur.execute("UPDATE articles SET title=%s, body=%s WHERE id=%s",(title,body,id))
+        mysql.connection.commit()
+        cur.close()
+        flash('Article Updated', 'success')
+        return redirect(url_for('dashboard'))
+    return render_template('edit_article.html', form=form)
 
 if __name__ == '__main__':
     app.secret_key='secret123'

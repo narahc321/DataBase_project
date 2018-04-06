@@ -175,3 +175,6 @@ CHANGE COLUMN `AadhaarNumber` `UserID` VARCHAR(50) NOT NULL ;
 
 ALTER TABLE `MobileVoting`.`ElectionOfficer` 
 CHANGE COLUMN `Password` `Password` VARCHAR(255) NULL DEFAULT NULL ;
+
+ALTER TABLE `MobileVoting`.`Candidate` 
+CHANGE COLUMN `ConstituencyId` `Constituency` VARCHAR(100) NULL DEFAULT NULL ;
