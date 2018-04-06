@@ -172,3 +172,6 @@ CHANGE COLUMN `PinCode` `PinCode` INT NULL DEFAULT NULL ;
 
 ALTER TABLE `MobileVoting`.`ElectionOfficer` 
 CHANGE COLUMN `AadhaarNumber` `UserID` VARCHAR(50) NOT NULL ;
+
+ALTER TABLE `MobileVoting`.`ElectionOfficer` 
+CHANGE COLUMN `Password` `Password` VARCHAR(255) NULL DEFAULT NULL ;
