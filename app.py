@@ -1,3 +1,5 @@
+import time
+import datetime
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, RadioField, DateField,SelectField
@@ -47,14 +49,13 @@ class Registerform(Form):
         [validators.DataRequired()],
         choices=[('Male', 'Male'), ('Female', 'Female'),('Other', 'Other')], default='Male'
     )
-    dob = DateField('', format='%Y-%m-%d',)
-    # def validate_dob(form, field):
-    #     cur = datetime.year()
-    #     age = cur - field.data
-    #     age =age/365
-    #     if age < 18:
-    #         raise ValidationError('Invalid Age.')
-        
+    dob = DateField('', format='%Y-%m-%d')
+    def validate_dob(self, dob):
+        # print (datetime.date.today() - dob.data).days
+        if (datetime.date.today() - dob.data).days < 18*365 :
+            flash("Under 18",'danger')
+            raise ValidationError('Under 18')
+
     aadhaar_no = StringField('',[validators.Required(),validators.Length(min=12,max=12),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
     pincode = StringField('',[validators.Required(),validators.Length(min=6,max=6),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
     phone = StringField('',[validators.Required(),validators.Length(min=10,max=11),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
