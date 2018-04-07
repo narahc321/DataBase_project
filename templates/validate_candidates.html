@@ -12,7 +12,7 @@
         {% for candidate in candidates %}
             <tr>
                 <td>{{candidate.AadhaarNumber}}</td>
-                
+                <td>{{candidate.Validate}}</td>
                 <td><a href="validate_candidate/{{candidate.AadhaarNumber}}" class="btn btn-default pull-right">Valiate</a></td>
             </tr>
         {% endfor %}

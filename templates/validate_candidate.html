@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1>{{voter_details.AadhaarNumber}}</h1>
+    <hr>
+    <div>
+        {{voter_details.Name }}<br>
+        {{voter_details.Gender }}<br>
+        {{voter_details.DateOfBirth }}<br>
+        {{voter_details.PinCode }}<br>
+        {{voter_details.MobileNumber }}<br>
+        {{candidate_details.PhotoLink }}<br>
+        {{candidate_details.SignatureLink }}<br>
+        {{candidate_details.EduQua }}<br>
+        {{candidate_details.Validate }}<br>
+        <form action="{{url_for('validate', AadhaarNumber = voter_details.AadhaarNumber ) }}" method="post">
+            <input type="hidden" name ="method" value="VALIDATE">
+            <input type="submit" value="Validate" class="btn btn-danger">
+        </form>
+    </div>
+{% endblock %}

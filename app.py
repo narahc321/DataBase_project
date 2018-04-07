@@ -469,17 +469,42 @@ def validate_candidates():
     candidates =cur.fetchall()
     cur.close()
     return render_template('validate_candidates.html',candidates = candidates)
+
+@app.route('/reset_votes', methods=['POST'])
+@is_logged_in
+def reset_votes():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    data = cur.fetchone()
+    constituency = data['Constituency']
+    cur.execute("UPDATE Candidate set NumberOfVotes = 0 WHERE Constituency = %s ",[constituency])
+    cur.execute("UPDATE Voter natural join City set VotingStatus  = 0 WHERE State = %s ",[constituency])
+    mysql.connection.commit()
+    cur.close()
     return redirect(url_for('dashboard'))
 
 @app.route('/validate_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
 @is_logged_in
-def edit_article(AadhaarNumber):
+def validate_candidate(AadhaarNumber):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * from Voter WHERE AadhaarNumber= %s",[AadhaarNumber])
     voter_details = cur.fetchone()
     cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     candidate_details = cur.fetchone()
     return render_template('/validate_candidate.html', voter_details=voter_details,candidate_details=candidate_details)
+
+@app.route('/validate/<string:AadhaarNumber>', methods=['GET','POST'])
+@is_logged_in
+def validate(AadhaarNumber):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT Validate FROM Candidate WHERE AadhaarNumber = %s ",[AadhaarNumber])
+    data = cur.fetchone()
+    status = 1 - data['Validate']
+    cur.execute("UPDATE Candidate set Validate = %s WHERE AadhaarNumber = %s ",[status,AadhaarNumber])
+    mysql.connection.commit()
+    cur.close()
+    flash('Validated', 'success')
+    return redirect(url_for('validate_candidates'))
 
 if __name__ == '__main__':
     app.secret_key='secret123'

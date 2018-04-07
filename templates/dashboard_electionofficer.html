@@ -22,6 +22,10 @@
                     <input type="hidden" name ="method" value="StartStop nominations">
                     <input type="submit" value="StartStop nominations" class="btn btn-danger">
                 </form>
+                <form action="{{url_for('reset_votes') }}" method="post">
+                    <input type="hidden" name ="method" value="reset_votes">
+                    <input type="submit" value="reset_votes" class="btn btn-danger">
+                </form>
                 <td><a href="validate_candidates" class="btn btn-default pull-right">Validate Nominations</a></td>
             </td>
     </table>
