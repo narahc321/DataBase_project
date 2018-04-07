@@ -10,7 +10,7 @@ CREATE TABLE Voter(
 	MobileNumber VARCHAR(50),
 	EmailId VARCHAR(50),
 	Password VARCHAR(255),
-	Voting Status VARCHAR(50),
+	VotingStatus VARCHAR(50),
 	PRIMARY KEY (AadhaarNumber)
 );
 
@@ -37,14 +37,14 @@ CREATE TABLE ElectionOfficer(
 	UserID VARCHAR(50),
 	Constituency VARCHAR(50),
 	Password VARCHAR(225),
-	PRIMARY KEY (AadhaarNumber)
+	PRIMARY KEY (UserID)
 );
 
 CREATE TABLE Constituency(
 	State VARCHAR(50),
 	Id INT(50) NOT NULL AUTO_INCREMENT,
 	StartStopElection INT(11),
-	StartStopNominayion INT(11),
+	StartStopNomination INT(11),
 	PRIMARY KEY (Id)
 );
 
@@ -79,7 +79,8 @@ INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
 
 
-LOAD DATA LOCAL INFILE "/home/charan/project/states.txt" INTO TABLE Constituency;
+LOAD DATA LOCAL INFILE "/home/anagh/states.txt" INTO TABLE Constituency;
+LOAD DATA LOCAL INFILE "/home/anagh/pincode.txt" INTO TABLE City;
 
 
 INSERT INTO Constituency (STATE) VALUES("ANDAMAN & NICOBAR ISLANDS");
