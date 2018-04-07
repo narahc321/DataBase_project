@@ -417,7 +417,7 @@ def add_electionofficer():
         result = cur.execute("SELECT * FROM ElectionOfficer WHERE UserID=%s",[userid])
         if result>0 :
             flash('Already a user exists!','danger')
-            return render_template('register_electionofficer.html',form=form, rows = rows)
+            return render_template('add_electionofficer.html',form=form, rows = rows)
         cur.execute("INSERT INTO ElectionOfficer(UserID, Constituency, Password) VALUES(%s, %s, %s)",(userid, constituency, password))
         mysql.connection.commit()
         cur.close()
@@ -432,8 +432,9 @@ def StartStop_elections():
     cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
-    cur.execute("SELECT * FROM Constituency WHERE State = %s ",[constituency])
+    cur.execute("SELECT StartStopElection FROM Constituency WHERE State = %s ",[constituency])
     data =cur.fetchone()
+    print data
     status = 1 - data['StartStopElection']
     cur.execute("UPDATE Constituency SET  StartStopElection = %s WHERE State = %s ",[status,constituency])
     mysql.connection.commit()
@@ -448,7 +449,7 @@ def StartStop_nominations():
     cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
-    cur.execute("SELECT * FROM Constituency WHERE State = %s ",[constituency])
+    cur.execute("SELECT StartStopNomination FROM Constituency WHERE State = %s ",[constituency])
     data =cur.fetchone()
     status = 1 - data['StartStopNomination']
     cur.execute("UPDATE Constituency SET  StartStopNomination = %s WHERE State = %s ",[status,constituency])
@@ -474,21 +475,11 @@ def validate_candidates():
 @is_logged_in
 def edit_article(AadhaarNumber):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * from articles WHERE id= %s",[id])
-    article = cur.fetchone()
-    form = ArticleForm(request.form)
-    form.title.data = article['title']
-    form.body.data = article['body']
-    if request.method == 'POST' and form.validate():
-        title = request.form['title']
-        body = request.form['body']
-        cur =mysql.connection.cursor()
-        cur.execute("UPDATE articles SET title=%s, body=%s WHERE id=%s",(title,body,id))
-        mysql.connection.commit()
-        cur.close()
-        flash('Article Updated', 'success')
-        return redirect(url_for('dashboard'))
-    return render_template('edit_article.html', form=form)
+    cur.execute("SELECT * from Voter WHERE AadhaarNumber= %s",[AadhaarNumber])
+    voter_details = cur.fetchone()
+    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    candidate_details = cur.fetchone()
+    return render_template('/validate_candidate.html', voter_details=voter_details,candidate_details=candidate_details)
 
 if __name__ == '__main__':
     app.secret_key='secret123'
