@@ -6,19 +6,18 @@ CREATE TABLE Voter(
 	Gender VARCHAR(20),
 	DateOfBirth DATE,
 	AadhaarNumber VARCHAR(20),
-	FatherName VARCHAR(70),
-	Address VARCHAR(150),
 	PinCode VARCHAR(50),
 	MobileNumber VARCHAR(50),
 	EmailId VARCHAR(50),
 	Password VARCHAR(255),
+	Voting Status VARCHAR(50),
 	PRIMARY KEY (AadhaarNumber)
 );
 
 CREATE TABLE City(
-	PinCode VARCHAR(50),
-	city VARCHAR(50),
-	ConstituencyId INT(50),
+	PinCode INT(50),
+	City VARCHAR(50),
+	State VARCHAR(50),
 	PRIMARY KEY (PinCode)
 );
 
@@ -27,20 +26,25 @@ CREATE TABLE Candidate(
 	PhotoLink VARCHAR(50),
 	SignatureLink VARCHAR(50),
 	EduQua VARCHAR(50),
-	ConstituencyId INT(50),
+	Constituency INT(50),
+	NumberOfVotes INT(11),
+	Validate INT(11),
 	PRIMARY KEY (AadhaarNumber),
 	FOREIGN KEY (AadhaarNumber) REFERENCES Voter (AadhaarNumber) 
 );
 
 CREATE TABLE ElectionOfficer(
-	AadhaarNumber VARCHAR(50),
+	UserID VARCHAR(50),
 	Constituency VARCHAR(50),
+	Password VARCHAR(225),
 	PRIMARY KEY (AadhaarNumber)
 );
 
 CREATE TABLE Constituency(
 	State VARCHAR(50),
 	Id INT(50) NOT NULL AUTO_INCREMENT,
+	StartStopElection INT(11),
+	StartStopNominayion INT(11),
 	PRIMARY KEY (Id)
 );
 
@@ -75,60 +79,8 @@ INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
 INSERT INTO Constituency (STATE) VALUES("West Bengal");
 
 
-ALTER TABLE `MobileVoting`.`Voter` 
-ADD COLUMN `VotingStatus` INT NULL DEFAULT 0 AFTER `Password`;
-
-ALTER TABLE `MobileVoting`.`Candidate` 
-ADD COLUMN `NumberOfVotes` INT NULL DEFAULT 0 AFTER `ConstituencyId`;
-
-ALTER TABLE `MobileVoting`.`Candidate` 
-ADD COLUMN `Validate` INT NULL DEFAULT 0 AFTER `NumberOfVotes`;
-
-ALTER TABLE `MobileVoting`.`Constituency` 
-ADD COLUMN `StartStop` INT NULL DEFAULT 0 AFTER `Id`;
-
-ALTER TABLE `MobileVoting`.`ElectionOfficer` 
-ADD COLUMN `Password` VARCHAR(45) NULL AFTER `Constituency`;
-
-ALTER TABLE `MobileVoting`.`Voter` 
-ADD INDEX `FK_pincode_idx` (`PinCode` ASC);
-ALTER TABLE `MobileVoting`.`Voter` 
-ADD CONSTRAINT `FK_pincode`
-  FOREIGN KEY (`PinCode`)
-  REFERENCES `MobileVoting`.`City` (`PinCode`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
-
-
-SELECT * FROM Candidate where ConstituencyId = 23 order by NumberOfVotes DESC;
-
-ALTER TABLE `MobileVoting`.`City` 
-DROP COLUMN `ConstituencyId`,
-ADD COLUMN `State` VARCHAR(45) NULL AFTER `city`;
-
-ALTER TABLE `MobileVoting`.`City` 
-CHANGE COLUMN `city` `city` VARCHAR(255) NULL DEFAULT NULL ,
-CHANGE COLUMN `State` `State` VARCHAR(255) NULL DEFAULT NULL ;
-
-Drop table City;
-CREATE TABLE `MobileVoting`.`City` (
-  `PinCode` INT NOT NULL,
-  `City` VARCHAR(100) NULL,
-  `State` VARCHAR(100) NULL,
-  PRIMARY KEY (`PinCode`));
-
-LOAD DATA LOCAL INFILE "/home/charan/project/pincode.txt" INTO TABLE City;
-
-CREATE TABLE `MobileVoting`.`Constituency` (
-  `ID` INT NOT NULL AUTO_INCREMENT,
-  `State` VARCHAR(100) NULL,
-  `StartStop` INT NULL,
-  PRIMARY KEY (`ID`));
-
 LOAD DATA LOCAL INFILE "/home/charan/project/states.txt" INTO TABLE Constituency;
 
-ALTER TABLE `MobileVoting`.`Constituency` 
-CHANGE COLUMN `StartStop` `StartStop` INT NULL DEFAULT 0 ;
 
 INSERT INTO Constituency (STATE) VALUES("ANDAMAN & NICOBAR ISLANDS");
 INSERT INTO Constituency (STATE) VALUES("ANDHRA PRADESH");
@@ -167,14 +119,3 @@ INSERT INTO Constituency (STATE) VALUES("UTTAR PRADESH");
 INSERT INTO Constituency (STATE) VALUES("UTTARAKHAND");
 INSERT INTO Constituency (STATE) VALUES("WEST BENGAL");
 
-ALTER TABLE `MobileVoting`.`Voter` 
-CHANGE COLUMN `PinCode` `PinCode` INT NULL DEFAULT NULL ;
-
-ALTER TABLE `MobileVoting`.`ElectionOfficer` 
-CHANGE COLUMN `AadhaarNumber` `UserID` VARCHAR(50) NOT NULL ;
-
-ALTER TABLE `MobileVoting`.`ElectionOfficer` 
-CHANGE COLUMN `Password` `Password` VARCHAR(255) NULL DEFAULT NULL ;
-
-ALTER TABLE `MobileVoting`.`Candidate` 
-CHANGE COLUMN `ConstituencyId` `Constituency` VARCHAR(100) NULL DEFAULT NULL ;

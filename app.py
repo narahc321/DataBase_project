@@ -9,7 +9,6 @@ from wtforms.fields.html5 import DateField
 from werkzeug.utils import secure_filename
 from flask_wtf.file import FileField,FileAllowed,FileRequired
 from flask_uploads import UploadSet,configure_uploads,IMAGES 
-from flask_recaptcha import ReCaptcha
 from flask_wtf import RecaptchaField
 from wtforms import ValidationError
 
