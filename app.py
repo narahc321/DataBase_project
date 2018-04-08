@@ -226,7 +226,7 @@ def login():
             else:
                 cur.close()
                 flash('Invalid Credentials','danger')
-                return render_template('login.html')
+                return render_template('login.html',form=form)
             cur.close()
         else:
             flash('Username not found','danger')
@@ -335,10 +335,11 @@ def dashboard_electionofficer():
     username = session['username']
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM ElectionOfficer WHERE UserID=%s",[username])
+    constituency = cur.fetchone()
+    cur.execute("SELECT * FROM Constituency WHERE State=%s",[constituency['Constituency']])
     constituency_details = cur.fetchone()
-    constituency =  constituency_details['Constituency']
     cur.close()
-    return render_template('dashboard_electionofficer.html', constituency=constituency)
+    return render_template('dashboard_electionofficer.html', constituency_details=constituency_details)
 
 
 @app.route('/vote_cast', methods=['GET', 'POST'])
@@ -357,7 +358,7 @@ def vote_cast():
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     constituency = city_details['State']
-    cur.execute('SELECT * from Candidate where Constituency=%s',[constituency])
+    cur.execute('SELECT * from Candidate where Constituency=%s AND Validate = 1',[constituency])
     candidates = cur.fetchall()
     return render_template('vote_cast.html',candidates=candidates )
 

@@ -3,30 +3,22 @@
 {% block body %}
     <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
     <hr>
-    <table class="table table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Date</th>
-            <th></th>
-            <th></th>
-        </tr>
-                <td>
+    
                     <form action="{{url_for('StartStop_elections') }}" method="post">
                         <input type="hidden" name ="method" value="StartStop elections">
-                        <input type="submit" value="StartStop elections" class="btn btn-danger">
+                        <input type="submit" value="StartStop elections" class="btn btn-danger"><br>
                     </form>
-                
-                <form action="{{url_for('StartStop_nominations') }}" method="post">
-                    <input type="hidden" name ="method" value="StartStop nominations">
-                    <input type="submit" value="StartStop nominations" class="btn btn-danger">
+                    <th>{{constituency_details.StartStopElection}}</th><br>
+                    <th>
+                    <form action="{{url_for('StartStop_nominations') }}" method="post"><br>
+                    <input type="hidden" name ="method" value="StartStop nominations"><br>
+                    <input type="submit" value="StartStop nominations" class="btn btn-danger"><br>
+                    <td>{{constituency_details.StartStopNomination}}</td><br>
+
                 </form>
                 <form action="{{url_for('reset_votes') }}" method="post">
                     <input type="hidden" name ="method" value="reset_votes">
-                    <input type="submit" value="reset_votes" class="btn btn-danger">
+                    <input type="submit" value="reset_votes" class="btn btn-danger"><br>
                 </form>
-                <td><a href="validate_candidates" class="btn btn-default pull-right">Validate Nominations</a></td>
-            </td>
-    </table>
+                <td><a href="validate_candidates" class="btn btn-default pull-right">Validate Nominations</a></td><br>
 {% endblock %}
