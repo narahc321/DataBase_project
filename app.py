@@ -263,6 +263,53 @@ def login_electionofficer():
             return redirect(url_for('/login_electionofficer'))
     return render_template('login_electionofficer.html',form=form)
 
+class ChangePasswordform(Form):
+    old_password = PasswordField('',[validators.DataRequired()])
+    new_password = PasswordField('',[
+        validators.DataRequired(),validators.Regexp(regex=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])', message="Password must contain atleast one lowercase letter ,one uppercase letter and one number"),
+        validators.length(min=6,max=20),validators.EqualTo('confirm', message='passwords do not match')
+    ])
+    confirm = PasswordField('')
+
+@app.route('/change_password',methods=['GET','POST'])
+@is_logged_in
+def change_password():
+    form = ChangePasswordform(request.form)
+    if request.method == 'POST' and form.validate():
+        old_password = form.old_password.data
+        new_password = sha256_crypt.encrypt(str(form.new_password.data))
+        if session['type'] == 'V' or session['type'] == 'C':
+            cur =mysql.connection.cursor()
+            result = cur.execute("SELECT Password FROM Voter WHERE AadhaarNumber=%s",[session['username']])
+            if result>0 :
+                data = cur.fetchone()
+                password = data['Password']
+                if sha256_crypt.verify(old_password, password):
+                    cur.execute('UPDATE Voter set Password=%s WHERE AadhaarNumber=%s',[new_password,session['username']])
+                    flash('password succesfully changed', 'success')
+                    cur.close()
+                    return redirect(url_for('dashboard'))
+                else:
+                    cur.close()
+                    flash('Invalid Credentials','danger')
+                    return render_template('change_password',form=form)
+        elif session['type'] == 'E' or session['type'] == 'A':
+            cur =mysql.connection.cursor()
+            result = cur.execute("SELECT Password FROM ElectionOfficer WHERE UserID=%s",[session['username']])
+            if result>0 :
+                data = cur.fetchone()
+                password = data['Password']
+                if sha256_crypt.verify(old_password, password):
+                    cur.execute('UPDATE ElectionOfficer set Password=%s WHERE UserID=%s',[new_password,session['username']])
+                    flash('password succesfully changed', 'success')
+                    cur.close()
+                    return redirect(url_for('dashboard'))
+                else:
+                    cur.close()
+                    flash('Invalid Credentials','danger')
+                    return render_template('change_password.html',form=form)
+    return render_template('change_password.html',form=form)
+
 @app.route('/logout')
 @is_logged_in
 def logout():
