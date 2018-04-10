@@ -248,14 +248,18 @@ def login_electionofficer():
                 session['logged_in'] = True
                 session['username'] = username
                 session['type'] = 'E'
+                if data['Constituency'] == 'INDIA':
+                    session['type'] = 'A'
                 flash('you are now logged in', 'success')
+                cur.close()
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid login','danger')
+                cur.close()
                 return redirect(url_for('/login_electionofficer'))
-            cur.close()
         else:
             flash('Username not found','danger')
+            cur.close()
             return redirect(url_for('/login_electionofficer'))
     return render_template('login_electionofficer.html',form=form)
 
@@ -285,12 +289,14 @@ def withdraw():
 @is_logged_in
 def dashboard():
     session_type = session['type']
-    if session_type =='E' :
+    if session_type =='V' :
         return redirect(url_for('dashboard_electionofficer'))
     if session_type =='C' :
         return redirect(url_for('dashboard_candidate'))
-    if session_type =='V' :
+    if session_type =='E' :
         return redirect(url_for('dashboard_voter'))
+    if session_type =='A' :
+        return redirect(url_for('admin'))
     return redirect(url_for('logout'))
     
 @app.route('/dashboard_voter')
@@ -341,6 +347,20 @@ def dashboard_electionofficer():
     cur.close()
     return render_template('dashboard_electionofficer.html', constituency_details=constituency_details)
 
+@app.route('/admin')
+@is_logged_in
+def admin():
+    if session['type']!='A':
+        return redirect(url_for('dashboard'))
+    cur = mysql.connection.cursor()
+    result = cur.execute('SELECT * FROM ElectionOfficer WHERE Constituency != %s',['INDIA'])
+    if result == 0:
+        msg = 'No officer'
+        cur.close()
+        return render_template('admin.html',msg=msg)
+    officers = cur.fetchall()
+    cur.close()
+    return render_template('admin.html',officers=officers)
 
 @app.route('/vote_cast', methods=['GET', 'POST'])
 @is_logged_in
@@ -397,8 +417,8 @@ def vote_candidate(AadhaarNumber):
     return render_template('vote_candidate.html',form=form,candidate=candidate)
 
 class ElectionOfficerRegisterform(Form):
-    userid = StringField('User ID',[validators.Length(min=1,max=50)])
-    password = StringField('User ID',[validators.Length(min=1,max=50)])
+    userid = StringField('',[validators.Length(min=1,max=50)])
+    password =  PasswordField('',[validators.Length(min=1,max=50)])
 
 @app.route('/add_electionofficer',methods=['GET','POST'])
 @is_logged_in
@@ -425,6 +445,17 @@ def add_electionofficer():
         flash('Succesfully Added!!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('add_electionofficer.html',form=form, rows = rows)
+
+@app.route('/remove_electionofficer/<string:UserID>',methods=['POST'])
+@is_logged_in
+def remove_electionofficer(UserID):
+    cur = mysql.connection.cursor()
+    print UserID
+    cur.execute('DELETE FROM ElectionOfficer WHERE UserID=%s',[UserID])
+    mysql.connection.commit()
+    cur.close()
+    flash('Succesfully Removed!!', 'success')
+    return redirect(url_for('dashboard'))
 
 @app.route('/StartStop_elections', methods=['POST'])
 @is_logged_in
