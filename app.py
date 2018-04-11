@@ -391,12 +391,17 @@ def dashboard_electionofficer():
         return redirect(url_for('dashboard'))
     username = session['username']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID=%s",[username])
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID=%s",[username])
     constituency = cur.fetchone()
     cur.execute("SELECT * FROM Constituency WHERE State=%s",[constituency['Constituency']])
     constituency_details = cur.fetchone()
+    print constituency_details
+    cur.execute('SELECT COUNT(AadhaarNumber),SUM(VotingStatus) from Voter NATURAL JOIN (SELECT PinCode from City Where State =%s) AS T',[constituency['Constituency']])
+    voter_stats=cur.fetchone()
+    print voter_stats
+    print voter_stats['SUM(VotingStatus)']
     cur.close()
-    return render_template('dashboard_electionofficer.html', constituency_details=constituency_details)
+    return render_template('dashboard_electionofficer.html', constituency_details=constituency_details,voter_stats=voter_stats)
 
 @app.route('/admin')
 @is_logged_in
