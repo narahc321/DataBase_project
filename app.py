@@ -38,7 +38,6 @@ def about():
     return render_template('about.html')
 
 photos = UploadSet('photos',IMAGES)
-
 configure_uploads(app,photos)
 
 class Registerform(Form):
@@ -72,6 +71,9 @@ class Registerform(Form):
 
 @app.route('/register',methods=['GET','POST'])
 def register():
+    if 'logged_in' in session:
+        flash('logout to register','danger')
+        return redirect(url_for('dashboard'))
     form =Registerform(request.form)
     if  request.method =='POST' and form.validate():
         name = form.name.data
@@ -83,7 +85,6 @@ def register():
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
         cur =mysql.connection.cursor()
-
         result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
         if result>0 :
             flash('Already a user! Try logging in','danger')
@@ -147,7 +148,6 @@ def register_candidate():
         if state == None:
             flash('Select Contituency','danger')
             return render_template('register_candidate.html',form=form, rows = rows)
-
         cur =mysql.connection.cursor()
         result = cur.execute("SELECT * FROM Candidate WHERE AadhaarNumber=%s",[username])
         if result > 0:
@@ -174,33 +174,6 @@ def register_candidate():
             return render_template('register_candidate.html',form=form, rows = rows)
     return render_template('register_candidate.html',form=form, rows = rows)
 
-
-@app.route('/edit_voter',methods=['GET','POST'])
-def edit_voter() :
-    session_type =session['type']
-    print session_type
-    if session_type != 'C' and session_type != 'V' :
-        flash('Not a valid User,Try to login in')
-        return redirect(url_for('logout'))
-    form = Registerform(request.form)
-    username = session['username']
-    cur = mysql.connection.cursor()
-    result = cur.execute('SELECT * FROM Voter WHERE AadhaarNumber = %s',[username])
-    if result <= 0:
-        print result
-        flash('Not a valid User,Try to login in')
-        return redirect(url_for('logout'))
-    data = cur.fetchone()
-    form.name.data = data['Name']
-    form.gender.data = data['Gender']
-    form.dob.data = data['DateOfBirth']
-    form.aadhaar_no.data = data['AadhaarNumber']
-    form.pincode.data = data['PinCode']
-    form.phone.data = data['MobileNumber']
-    form.email_id.data = data['EmailId']
-    return render_template('edit_voter.html',form=form)
-
-
 class Loginform(Form):
     aadhaar_no = StringField('',[validators.DataRequired()])
     password = PasswordField('',[validators.DataRequired()])
@@ -208,6 +181,9 @@ class Loginform(Form):
 #user login
 @app.route('/login',methods=['GET','POST'])
 def login():
+    if 'logged_in' in session:
+        flash('logout to login as different user!!','danger')
+        return redirect(url_for('dashboard'))
     form =Loginform(request.form)
     if request.method == 'POST' and form.validate():
         username = form.aadhaar_no.data
@@ -239,6 +215,9 @@ def login():
 
 @app.route('/login_electionofficer',methods=['GET','POST'])
 def login_electionofficer():
+    if 'logged_in' in session:
+        flash('logout to login as different user!!','danger')
+        return redirect(url_for('dashboard'))
     form =Loginform(request.form)
     if request.method == 'POST' and form.validate():
         username = form.aadhaar_no.data
@@ -252,8 +231,8 @@ def login_electionofficer():
                 session['logged_in'] = True
                 session['username'] = username
                 session['type'] = 'E'
-                # if data['Constituency'] == 'INDIA':
-                #     session['type'] = 'A'
+                if data['Constituency'] == 'INDIA':
+                    session['type'] = 'A'
                 flash('you are now logged in', 'success')
                 cur.close()
                 return redirect(url_for('dashboard'))
@@ -398,8 +377,6 @@ def dashboard_electionofficer():
     print constituency_details
     cur.execute('SELECT COUNT(AadhaarNumber),SUM(VotingStatus) from Voter NATURAL JOIN (SELECT PinCode from City Where State =%s) AS T',[constituency['Constituency']])
     voter_stats=cur.fetchone()
-    print voter_stats
-    print voter_stats['SUM(VotingStatus)']
     cur.close()
     return render_template('dashboard_electionofficer.html', constituency_details=constituency_details,voter_stats=voter_stats)
 
@@ -431,7 +408,7 @@ def vote_cast():
         flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
     pincode =  user_details['PinCode']
-    cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+    cur.execute("SELECT State FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     constituency = city_details['State']
     cur.execute('SELECT * from Candidate where Constituency=%s AND Validate = 1',[constituency])
@@ -446,7 +423,13 @@ class Votingform(Form):
 def vote_candidate(AadhaarNumber):
     if session['type'] != 'V' and session['type'] != 'C' :
         return redirect(url_for('dashboard'))
+    username = session['username']
     cur = mysql.connection.cursor()
+    cur.execute("SELECT VotingStatus FROM Voter WHERE AadhaarNumber=%s", [username])
+    user_details = cur.fetchone()
+    if user_details['VotingStatus'] == 1 :
+        flash('Already Casted Vote', 'danger')
+        return redirect(url_for('dashboard'))
     cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     candidate = cur.fetchone()
     form = Votingform(request.form)
@@ -479,9 +462,12 @@ class ElectionOfficerRegisterform(Form):
 @app.route('/add_electionofficer',methods=['GET','POST'])
 @is_logged_in
 def add_electionofficer():
+    if session['type'] != 'A' :
+        flash('Only ADMIN can ADD','danger')
+        return redirect(url_for('dashboard'))
     rows = []
     cur =mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM Constituency")
+    result = cur.execute("SELECT State FROM Constituency")
     data = cur.fetchall()
     for state in data :
         rows.append(state['State'])
@@ -491,7 +477,7 @@ def add_electionofficer():
         password = sha256_crypt.encrypt(str(form.password.data))
         constituency = request.form.get("states")
         cur =mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM ElectionOfficer WHERE UserID=%s",[userid])
+        result = cur.execute("SELECT UserID FROM ElectionOfficer WHERE UserID=%s",[userid])
         if result>0 :
             flash('Already a user exists!','danger')
             return render_template('add_electionofficer.html',form=form, rows = rows)
@@ -505,8 +491,10 @@ def add_electionofficer():
 @app.route('/remove_electionofficer/<string:UserID>',methods=['POST'])
 @is_logged_in
 def remove_electionofficer(UserID):
+    if session['type'] != 'A':
+        flash('ONLY ADMIN CAN REMOVE','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    print UserID
     cur.execute('DELETE FROM ElectionOfficer WHERE UserID=%s',[UserID])
     mysql.connection.commit()
     cur.close()
@@ -516,6 +504,9 @@ def remove_electionofficer(UserID):
 @app.route('/StartStop_elections', methods=['POST'])
 @is_logged_in
 def StartStop_elections():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
@@ -533,8 +524,11 @@ def StartStop_elections():
 @app.route('/StartStop_nominations', methods=['POST'])
 @is_logged_in
 def StartStop_nominations():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
     cur.execute("SELECT StartStopNomination FROM Constituency WHERE State = %s ",[constituency])
@@ -549,8 +543,11 @@ def StartStop_nominations():
 @app.route('/validate_candidates', methods=['GET','POST'])
 @is_logged_in
 def validate_candidates():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
     cur.execute("SELECT AadhaarNumber, Validate FROM Candidate WHERE Constituency = %s ",[constituency])
@@ -561,8 +558,11 @@ def validate_candidates():
 @app.route('/reset_votes', methods=['POST'])
 @is_logged_in
 def reset_votes():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
     cur.execute("UPDATE Candidate set NumberOfVotes = 0 WHERE Constituency = %s ",[constituency])
@@ -574,17 +574,48 @@ def reset_votes():
 @app.route('/validate_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
 @is_logged_in
 def validate_candidate(AadhaarNumber):
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    data = cur.fetchone()
+    constituency = data['Constituency']
+    result = cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    if result == 0:
+        flash('Does not exsist','danger')
+        cur.close()
+        return redirect(url_for('dashboard'))
+    candidate_details = cur.fetchone()
+    if constituency != candidate_details['Constituency'] :
+        flash('Not of your Constituency','danger')
+        cur.close()
+        return redirect(url_for('dashboard'))
     cur.execute("SELECT * from Voter WHERE AadhaarNumber= %s",[AadhaarNumber])
     voter_details = cur.fetchone()
-    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
-    candidate_details = cur.fetchone()
+    cur.close()
     return render_template('/validate_candidate.html', voter_details=voter_details,candidate_details=candidate_details)
 
 @app.route('/validate/<string:AadhaarNumber>', methods=['GET','POST'])
 @is_logged_in
 def validate(AadhaarNumber):
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    data = cur.fetchone()
+    constituency = data['Constituency']
+    result = cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    if result == 0:
+        flash('Does not exsist','danger')
+        cur.close()
+        return redirect(url_for('dashboard'))
+    candidate_details = cur.fetchone()
+    if constituency != candidate_details['Constituency'] :
+        flash('Not of your Constituency','danger')
+        cur.close()
+        return redirect(url_for('dashboard'))
     cur.execute("SELECT Validate FROM Candidate WHERE AadhaarNumber = %s ",[AadhaarNumber])
     data = cur.fetchone()
     status = 1 - data['Validate']
