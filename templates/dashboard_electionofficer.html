@@ -156,14 +156,16 @@
                             <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
-                        <form action="{{url_for('reset_votes') }}" method="post">
-                            <input type="hidden" name ="method" value="reset_votes">
-                            <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
+                        <form action="{{url_for('clear_candidates') }}" method="post">
+                            <input type="hidden" name ="method" value="clear_candidates">
+                            <input type="submit" value="clear_candidates" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
                         <td><a href="validate_candidates" class="btn btn-fill btn-rose pull-right" style="width:250px">Validate Nominations</a></td><br>
                         number of voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</br>
-                        number of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}
+                        number of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}</br>
+                        number of candidates applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</br>
+                        number of candidates eligeble = {{ candidate_stats['SUM(Validate)'] }}
                 </div>
                 
             </div>

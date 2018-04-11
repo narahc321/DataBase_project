@@ -374,11 +374,12 @@ def dashboard_electionofficer():
     constituency = cur.fetchone()
     cur.execute("SELECT * FROM Constituency WHERE State=%s",[constituency['Constituency']])
     constituency_details = cur.fetchone()
-    print constituency_details
     cur.execute('SELECT COUNT(AadhaarNumber),SUM(VotingStatus) from Voter NATURAL JOIN (SELECT PinCode from City Where State =%s) AS T',[constituency['Constituency']])
     voter_stats=cur.fetchone()
+    cur.execute('SELECT COUNT(AadhaarNumber),SUM(Validate) from Candidate Where Constituency =%s',[constituency['Constituency']])
+    candidate_stats=cur.fetchone()
     cur.close()
-    return render_template('dashboard_electionofficer.html', constituency_details=constituency_details,voter_stats=voter_stats)
+    return render_template('dashboard_electionofficer.html', constituency_details=constituency_details,voter_stats=voter_stats,candidate_stats=candidate_stats)
 
 @app.route('/admin')
 @is_logged_in
@@ -415,7 +416,7 @@ def vote_cast():
     candidates = cur.fetchall()
     return render_template('vote_cast.html',candidates=candidates )
 
-class Votingform(Form):
+class Passwordform(Form):
     password = PasswordField('Password',[validators.DataRequired()])
 
 @app.route('/vote_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
@@ -430,9 +431,9 @@ def vote_candidate(AadhaarNumber):
     if user_details['VotingStatus'] == 1 :
         flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
-    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    cur.execute("SELECT * from Candidate,PhotoLink WHERE AadhaarNumber= %s",[AadhaarNumber])
     candidate = cur.fetchone()
-    form = Votingform(request.form)
+    form = Passwordform(request.form)
     username = session['username']
     if request.method == 'POST' and form.validate():
         password_voter = form.password.data
@@ -555,21 +556,64 @@ def validate_candidates():
     cur.close()
     return render_template('validate_candidates.html',candidates = candidates)
 
-@app.route('/reset_votes', methods=['POST'])
+@app.route('/clear_candidates', methods=['GET','POST'])
+@is_logged_in
+def clear_candidates():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
+    cur = mysql.connection.cursor()
+    form = Passwordform(request.form)
+    username = session['username']
+    if request.method == 'POST' and form.validate():
+        password_typed = form.password.data
+        result = cur.execute("SELECT Password,Constituency FROM ElectionOfficer WHERE UserID=%s",[username])
+        if result>0 :
+            data = cur.fetchone()
+            password = data['Password']
+            constituency = data['Constituency']
+            if sha256_crypt.verify(password_typed, password):
+                cur.execute("DELETE FROM Candidate WHERE Constituency = %s ",[constituency])
+                mysql.connection.commit()
+                cur.close()
+                flash('sucessful','sucess')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid Credentials')
+                cur.close()
+                return render_template('clear_candidates.html',form=form)
+    cur.close()
+    return render_template('clear_candidates.html',form=form)
+
+@app.route('/reset_votes', methods=['GET','POST'])
 @is_logged_in
 def reset_votes():
     if session['type'] != 'E':
         flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
-    data = cur.fetchone()
-    constituency = data['Constituency']
-    cur.execute("UPDATE Candidate set NumberOfVotes = 0 WHERE Constituency = %s ",[constituency])
-    cur.execute("UPDATE Voter natural join City set VotingStatus  = 0 WHERE State = %s ",[constituency])
-    mysql.connection.commit()
+    form = Passwordform(request.form)
+    username = session['username']
+    if request.method == 'POST' and form.validate():
+        password_typed = form.password.data
+        result = cur.execute("SELECT Password,Constituency FROM ElectionOfficer WHERE UserID=%s",[username])
+        if result>0 :
+            data = cur.fetchone()
+            password = data['Password']
+            constituency = data['Constituency']
+            if sha256_crypt.verify(password_typed, password):
+                cur.execute("UPDATE Candidate set NumberOfVotes = 0 WHERE Constituency = %s ",[constituency])
+                cur.execute("UPDATE Voter natural join City set VotingStatus  = 0 WHERE State = %s ",[constituency])
+                mysql.connection.commit()
+                cur.close()
+                flash('sucessful','sucess')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid Credentials')
+                cur.close()
+                return render_template('ResetVotes.html',form=form)
     cur.close()
-    return redirect(url_for('dashboard'))
+    return render_template('ResetVotes.html',form=form)
 
 @app.route('/validate_candidate/<string:AadhaarNumber>', methods=['GET','POST'])
 @is_logged_in
