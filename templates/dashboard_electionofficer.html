@@ -6,7 +6,7 @@
     
                     <form action="{{url_for('StartStop_elections') }}" method="post">
                         <input type="hidden" name ="method" value="StartStop elections">
-                        <input type="submit" value="StartStop elections" class="btn btn-danger"><br>
+                        <input type="submit" value="StartStop elections" class="btn btn-submit"><br>
                     </form>
                     <th>{{constituency_details.StartStopElection}}</th><br>
                     <th>
@@ -15,6 +15,10 @@
                     <input type="submit" value="StartStop nominations" class="btn btn-danger"><br>
                     <td>{{constituency_details.StartStopNomination}}</td><br>
 
+                </form>
+                <form action="{{url_for('reset_votes') }}" method="post">
+                    <input type="hidden" name ="method" value="reset_votes">
+                    <input type="submit" value="reset_votes" class="btn btn-danger"><br>
                 </form>
                 <form action="{{url_for('reset_votes') }}" method="post">
                     <input type="hidden" name ="method" value="reset_votes">

@@ -48,8 +48,12 @@ class Registerform(Form):
         [validators.DataRequired()],
         choices=[('Male', 'Male'), ('Female', 'Female'),('Other', 'Other')], default='Male'
     )
-    dob = DateField('', format='%Y-%m-%d')
+    dob = DateField('', format='%Y-%m-%d',)
     def validate_dob(self, dob):
+        print dob.data
+        if dob.data == None:
+            flash('Date Of Birth Required!','danger')
+            raise ValidationError('Date Of Birth Required!')
         # print (datetime.date.today() - dob.data).days
         if (datetime.date.today() - dob.data).days < 18*365 :
             flash("Under 18",'danger')
@@ -248,19 +252,19 @@ def login_electionofficer():
                 session['logged_in'] = True
                 session['username'] = username
                 session['type'] = 'E'
-                if data['Constituency'] == 'INDIA':
-                    session['type'] = 'A'
+                # if data['Constituency'] == 'INDIA':
+                #     session['type'] = 'A'
                 flash('you are now logged in', 'success')
                 cur.close()
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid login','danger')
                 cur.close()
-                return redirect(url_for('/login_electionofficer'))
+                return redirect(url_for('login_electionofficer'))
         else:
             flash('Username not found','danger')
             cur.close()
-            return redirect(url_for('/login_electionofficer'))
+            return redirect(url_for('login_electionofficer'))
     return render_template('login_electionofficer.html',form=form)
 
 class ChangePasswordform(Form):
@@ -336,11 +340,11 @@ def withdraw():
 @is_logged_in
 def dashboard():
     session_type = session['type']
-    if session_type =='V' :
+    if session_type =='E' :
         return redirect(url_for('dashboard_electionofficer'))
     if session_type =='C' :
         return redirect(url_for('dashboard_candidate'))
-    if session_type =='E' :
+    if session_type =='V' :
         return redirect(url_for('dashboard_voter'))
     if session_type =='A' :
         return redirect(url_for('admin'))
