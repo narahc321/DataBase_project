@@ -121,7 +121,7 @@
             <!--      Wizard container        -->
             <div class="wizard-container">
               <div class="card card-wizard" data-color="rose" id="wizardProfile">
-                <div style="margin-left:15%;">
+                <div style="margin-left:25%;">
                         {% if constituency_details.StartStopElection %}
                         <form action="{{url_for('StartStop_elections') }}" method="post">
                             <input type="hidden" name ="method" value="Stop elections">
@@ -151,14 +151,22 @@
                         </form>
                         <br>
                         {% endif %}
-                        <form action="{{url_for('ShowHide_results') }}" method="post">
-                          <input type="hidden" name ="method" value="ShowHide_results">
-                          <input type="submit" value="ShowHide_results" class="btn btn-fill btn" style="width:250px"><br>
-                          
-                          </form>
-                        <form action="{{url_for('reset_votes') }}" method="post">
-                            <input type="hidden" name ="method" value="reset_votes">
-                            <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
+                        {% if constituency_details.ShowHideResults %}
+                            <form action="{{url_for('ShowHide_results') }}" method="post">
+                            <input type="hidden" name ="method" value="Hide Results">
+                            <input type="submit" value="Hide Results" class="btn btn-fill btn-danger" style="width:250px"><br> 
+                            </form>
+  
+                        {% else %}
+                            <form action="{{url_for('ShowHide_results') }}" method="post">
+                            <input type="hidden" name ="method" value="Show Results">
+                            <input type="submit" value="Show Results" class="btn btn-fill btn-success" style="width:250px"><br> 
+                            </form>
+
+                        {% endif %}
+                          <form action="{{url_for('reset_votes') }}" method="post">
+                          <input type="hidden" name ="method" value="reset_votes">
+                          <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
                         <form action="{{url_for('clear_candidates') }}" method="post">
@@ -166,7 +174,7 @@
                             <input type="submit" value="clear_candidates" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
-                        <td><a href="validate_candidates" class="btn btn-fill btn-rose pull-right" style="width:250px">Validate Nominations</a></td><br>
+                        <a href="validate_candidates" class="btn btn-fill btn-rose pull-right" style="width:250px">Validate Nominations</a><br>
                         number of voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</br>
                         number of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}</br>
                         number of candidates applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</br>

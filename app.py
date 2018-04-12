@@ -426,7 +426,10 @@ def vote_candidate(AadhaarNumber):
         return redirect(url_for('dashboard'))
     username = session['username']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT VotingStatus FROM Voter WHERE AadhaarNumber=%s", [username])
+    result=cur.execute("SELECT VotingStatus FROM Voter WHERE AadhaarNumber=%s", [username])
+    if result == 0:
+        flash('candidate does not exist','danger')
+        return redirect(url_for('dashboard'))
     user_details = cur.fetchone()
     if user_details['VotingStatus'] == 1 :
         flash('Already Casted Vote', 'danger')
@@ -711,11 +714,12 @@ def result(Constituency):
         flash('results are not open for this constituency')
         return redirect(url_for('results'))
     result = cur.execute("SELECT * from Candidate WHERE Constituency= %s AND Validate = 1 ORDER BY NumberOfVotes DESC",[Constituency])
+    print result
     if result == 0:
         flash('No one participated','danger')
         cur.close()
         return redirect(url_for('results'))
-    candidates = cur.fetchone()
+    candidates = cur.fetchall()
     cur.close()
     print candidates
     return render_template('result.html',candidates=candidates)
