@@ -434,7 +434,7 @@ def vote_candidate(AadhaarNumber):
     if user_details['VotingStatus'] == 1 :
         flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
-    cur.execute("SELECT * from Candidate,PhotoLink WHERE AadhaarNumber= %s",[AadhaarNumber])
+    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     candidate = cur.fetchone()
     form = Passwordform(request.form)
     username = session['username']
@@ -481,6 +481,9 @@ def add_electionofficer():
         password = sha256_crypt.encrypt(str(form.password.data))
         constituency = request.form.get("states")
         cur =mysql.connection.cursor()
+        if constituency == None:
+            flash('Select Contituency','danger')
+            return render_template('add_electionofficer.html',form=form, rows = rows)
         result = cur.execute("SELECT UserID FROM ElectionOfficer WHERE UserID=%s",[userid])
         if result>0 :
             flash('Already a user exists!','danger')
