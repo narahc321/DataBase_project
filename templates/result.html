@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1>Result</h1>
+    <ul class="list-group">
+        {% for candidate in candidates %}
+        11
+            <tr>
+                <td>{{candidate.AadhaarNumber}}</td>
+                <td>{{candidate.NumberOfVotes}}</td>
+            </tr>
+        {% endfor %}
+    </ul>
+{% endblock %}

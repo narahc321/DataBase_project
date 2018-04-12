@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    <h1>constituencies</h1>
+    <ul class="list-group">
+        {% for Constituency in constituencies %}
+            <li class="list-group-item"><a href="/result/{{Constituency.State}}">{{Constituency.State}}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

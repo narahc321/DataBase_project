@@ -541,6 +541,25 @@ def StartStop_nominations():
     flash('Sucess', 'success')
     return redirect(url_for('dashboard'))
 
+@app.route('/ShowHide_results', methods=['POST'])
+@is_logged_in
+def ShowHide_results():
+    if session['type'] != 'E':
+        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
+        return redirect(url_for('dashboard'))
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
+    data = cur.fetchone()
+    constituency = data['Constituency']
+    cur.execute("SELECT ShowHideResults FROM Constituency WHERE State = %s ",[constituency])
+    data =cur.fetchone()
+    status = 1 - data['ShowHideResults']
+    cur.execute("UPDATE Constituency SET ShowHideResults = %s WHERE State = %s ",[status,constituency])
+    mysql.connection.commit()
+    cur.close()
+    flash('Sucess', 'success')
+    return redirect(url_for('dashboard'))
+
 @app.route('/validate_candidates', methods=['GET','POST'])
 @is_logged_in
 def validate_candidates():
@@ -668,6 +687,38 @@ def validate(AadhaarNumber):
     cur.close()
     flash('Validated', 'success')
     return redirect(url_for('validate_candidates'))
+
+@app.route('/results')
+def results():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT State FROM Constituency WHERE ShowHideResults = 1')
+    constituencies = cur.fetchall()
+    print constituencies
+    return render_template('results.html',constituencies=constituencies)
+
+@app.route('/result/<string:Constituency>', methods=['GET','POST'])
+@is_logged_in
+def result(Constituency):
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT ShowHideResults FROM Constituency WHERE State = %s ",[Constituency])
+    if result == 0:
+        flash('constituency does not exist','danger')
+        return redirect(url_for('/'))
+    data = cur.fetchone()
+    showhide = data['ShowHideResults']
+    if showhide == 0:
+        cur.close()
+        flash('results are not open for this constituency')
+        return redirect(url_for('results'))
+    result = cur.execute("SELECT * from Candidate WHERE Constituency= %s AND Validate = 1 ORDER BY NumberOfVotes DESC",[Constituency])
+    if result == 0:
+        flash('No one participated','danger')
+        cur.close()
+        return redirect(url_for('results'))
+    candidates = cur.fetchone()
+    cur.close()
+    print candidates
+    return render_template('result.html',candidates=candidates)
 
 if __name__ == '__main__':
     app.secret_key='secret123'

@@ -120,3 +120,5 @@ INSERT INTO Constituency (STATE) VALUES("UTTAR PRADESH");
 INSERT INTO Constituency (STATE) VALUES("UTTARAKHAND");
 INSERT INTO Constituency (STATE) VALUES("WEST BENGAL");
 
+ALTER TABLE `MobileVoting`.`Constituency` 
+ADD COLUMN `ShowHideResults` INT(11) NULL DEFAULT 0 AFTER `StartStopNomination`;

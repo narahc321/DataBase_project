@@ -121,7 +121,7 @@
             <!--      Wizard container        -->
             <div class="wizard-container">
               <div class="card card-wizard" data-color="rose" id="wizardProfile">
-                <div style="margin-left=15%;">
+                <div style="margin-left:15%;">
                         {% if constituency_details.StartStopElection %}
                         <form action="{{url_for('StartStop_elections') }}" method="post">
                             <input type="hidden" name ="method" value="Stop elections">
@@ -151,6 +151,11 @@
                         </form>
                         <br>
                         {% endif %}
+                        <form action="{{url_for('ShowHide_results') }}" method="post">
+                          <input type="hidden" name ="method" value="ShowHide_results">
+                          <input type="submit" value="ShowHide_results" class="btn btn-fill btn" style="width:250px"><br>
+                          
+                          </form>
                         <form action="{{url_for('reset_votes') }}" method="post">
                             <input type="hidden" name ="method" value="reset_votes">
                             <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
