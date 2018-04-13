@@ -271,7 +271,7 @@ def change_password():
                     cur.close()
                     print 2
                     flash('Invalid Credentials','danger')
-                    return render_template('change_password',form=form)
+                    return render_template('change_password.html',form=form)
         elif session['type'] == 'E' or session['type'] == 'A':
             cur =mysql.connection.cursor()
             result = cur.execute("SELECT Password FROM ElectionOfficer WHERE UserID=%s",[session['username']])
@@ -281,6 +281,7 @@ def change_password():
                 if sha256_crypt.verify(old_password, password):
                     cur.execute('UPDATE ElectionOfficer set Password=%s WHERE UserID=%s',[new_password,session['username']])
                     flash('password succesfully changed', 'success')
+                    mysql.connection.commit()
                     cur.close()
                     return redirect(url_for('dashboard'))
                 else:
