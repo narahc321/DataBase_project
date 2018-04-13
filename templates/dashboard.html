@@ -84,6 +84,12 @@
               <p> Register as Candidate </p>
             </a>
           </li>
+          <li class="nav-item ">
+            <a class="nav-link" href="/change_password">
+              
+              <button class="btn btn-rose btn-fill" onclick=demo.showSwal('warning-message-and-confirmation') style="width: 200px">Reset Password</button>
+            </a>
+          </li>
           <hr>
           <li class="nav-item ">
             <a class="nav-link" href="/logout">
@@ -168,7 +174,7 @@
                   <!--        You can switch " data-color="primary" "  with one of the next bright colors: "green", "orange", "red", "blue"       -->
                   <div class="card-header text-center">
                     <h3 class="card-title">
-                      Build Your Profile
+                      Your Profile
                     </h3>
                     <h5 class="card-description">This information will let us know more about you.</h5>
                   </div>
@@ -177,11 +183,6 @@
                       <li class="nav-item">
                         <a class="nav-link active" href="#about" data-toggle="tab" role="tab">
                           View Details
-                        </a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" href="#account" data-toggle="tab" role="tab">
-                          Edit Details
                         </a>
                       </li>
                       
@@ -194,75 +195,43 @@
                           
                           <div class="col-sm-6">
                             <div class="input-group form-control-lg">
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">Name : </span>{{user_details.Name}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">Gender : </span>{{user_details.Gender}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">Date Of Birth : </span>{{user_details.DateOfBirth}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                            
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">Aadhaar Number : </span>{{user_details.AadhaarNumber}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
                                	
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">City : </span>{{city_details.City}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">PinCode : </span>{{user_details.PinCode}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">Mobile Number : </span>{{user_details.MobileNumber}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
                               </div>
-                              <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                  <i class="material-icons">face</i>
-                                </span>
-                              </div>
+                              
                               <div class="form-group">
                                 <label for="exampleInput1" class="bmd-label-floating"><span style="color: black;">E-mail ID : </span>{{user_details.EmailId}}</label>
                                 <!-- <input type="text" class="form-control" id="exampleInput1" name="firstname" required> -->
@@ -358,10 +327,7 @@
                     <div class="mr-auto">
                       <input type="button" class="btn btn-previous btn-fill btn-default btn-wd disabled" name="previous" value="Previous">
                     </div>
-                    <div class="ml-auto">
-                      <input type="button" class="btn btn-next btn-fill btn-rose btn-wd" name="next" value="Next">
-                      <input type="button" class="btn btn-finish btn-fill btn-rose btn-wd" name="finish" value="Finish" style="display: none;">
-                    </div>
+                    
                     <div class="clearfix"></div>
                   </div>
                 </form>

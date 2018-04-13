@@ -262,12 +262,14 @@ def change_password():
                 data = cur.fetchone()
                 password = data['Password']
                 if sha256_crypt.verify(old_password, password):
-                    cur.execute('UPDATE Voter set Password=%s WHERE AadhaarNumber=%s',[new_password,session['username']])
+                    cur.execute("UPDATE Voter set Password=%s WHERE AadhaarNumber=%s",[new_password,session['username']])
+                    mysql.connection.commit()
                     flash('password succesfully changed', 'success')
                     cur.close()
                     return redirect(url_for('dashboard'))
                 else:
                     cur.close()
+                    print 2
                     flash('Invalid Credentials','danger')
                     return render_template('change_password',form=form)
         elif session['type'] == 'E' or session['type'] == 'A':
@@ -301,6 +303,7 @@ def withdraw():
         flash('Invalid User')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
+    cur.execute('SELECT Constituency from')
     username = session['username']
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
