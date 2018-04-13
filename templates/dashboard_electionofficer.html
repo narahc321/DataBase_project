@@ -6,8 +6,7 @@
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <!-- Favicons -->
-  <link rel="apple-touch-icon" href="../static/img/apple-icon.png">
-  <link rel="icon" href="../static/img/favicon.png">
+  <link rel="icon" type="image/png" href="../static/img/fav.png">
   <title>
     Dashboard
   </title>
@@ -121,7 +120,14 @@
             <!--      Wizard container        -->
             <div class="wizard-container">
               <div class="card card-wizard" data-color="rose" id="wizardProfile">
-                <div style="margin-left:25%;">
+              <div class="row">
+                <div class="col-md-6" style="margin-top: 15px;margin-left: 50px">
+                  <b>Number Of voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</b></br>
+                  <b>Number Of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}</b></br>
+                  <b>Number Of candidates applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</b></br>
+                  <b>Number Of candidates eligible = {{ candidate_stats['SUM(Validate)'] }}</b>
+                </div>
+                <div class="col-md-4" style="margin-top: 15px;">
                         {% if constituency_details.StartStopElection %}
                         <form action="{{url_for('StartStop_elections') }}" method="post">
                             <input type="hidden" name ="method" value="Stop elections">
@@ -156,30 +162,34 @@
                             <input type="hidden" name ="method" value="Hide Results">
                             <input type="submit" value="Hide Results" class="btn btn-fill btn-danger" style="width:250px"><br> 
                             </form>
-  
+                            <br>
                         {% else %}
                             <form action="{{url_for('ShowHide_results') }}" method="post">
                             <input type="hidden" name ="method" value="Show Results">
                             <input type="submit" value="Show Results" class="btn btn-fill btn-success" style="width:250px"><br> 
                             </form>
-
+                            <br>
                         {% endif %}
                           <form action="{{url_for('reset_votes') }}" method="post">
-                          <input type="hidden" name ="method" value="reset_votes">
-                          <input type="submit" value="reset_votes" class="btn btn-fill btn-rose" style="width:250px"><br>
+                          <input type="hidden" name ="method" value="reset votes">
+                          <input type="submit" value="reset votes" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
                         <form action="{{url_for('clear_candidates') }}" method="post">
-                            <input type="hidden" name ="method" value="clear_candidates">
-                            <input type="submit" value="clear_candidates" class="btn btn-fill btn-rose" style="width:250px"><br>
+                            <input type="hidden" name ="method" value="clear candidates">
+                            <input type="submit" value="clear candidates" class="btn btn-fill btn-rose" style="width:250px"><br>
                         </form>
                         <br>
-                        <a href="validate_candidates" class="btn btn-fill btn-rose pull-right" style="width:250px">Validate Nominations</a><br>
-                        number of voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</br>
-                        number of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}</br>
-                        number of candidates applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</br>
-                        number of candidates eligeble = {{ candidate_stats['SUM(Validate)'] }}
+                        <form action="{{url_for('validate_candidates') }}" method="post">
+                            <input type="hidden" name ="method" value="VALIDATE Nominations">
+                            <input type="submit" value="Validate Nominations" class="btn btn-fill btn-rose" style="width:250px"><br>
+                        </form>
+                        <br>
+                        
+                        
                 </div>
+                
+              </div>
                 
             </div>
             </div>

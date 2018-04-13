@@ -1,22 +1,273 @@
-{% extends 'layout.html' %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block body %}
-    <h1>Dashboard <small> Welcome {{session.username}}</small></h1>
-    <hr>
-    <table class="table table-striped">
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th></th>
-        </tr>
-        {% for candidate in candidates %}
-            <tr>
-                <td>{{candidate.AadhaarNumber}}</td>
-                <td>{{candidate.PhotoLink}}</td>
-                <img src="../static/img/{{candidate.PhotoLink}}" alt="photo" style="height:200px;width:250px;">
-                <td><a href="vote_candidate/{{candidate.AadhaarNumber}}" class="btn btn-default pull-right">Edit</a></td>
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="../static/img/fav.png">
+  <title>
+    Dashboard
+  </title>
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="../static/css/material-dashboard.css?v=2.0.1">
+  <!-- Documentation extras -->
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+  <link href="../static/assets-for-demo/demo.css" rel="stylesheet" />
+  <!-- iframe removal -->
+  <style>
+      .row{
+	width: 100%;
+}
+.col{
+	position:relative;
+    width:250px;
+    height:250px;
+    overflow:hidden;
+    float:left;
+    margin-right:20px;
+    margin-left: 100px;
+}
+
+.col figure{
+	position: relative;
+}
+.col figure .image{
+	display:block;
+    position:relative;
+    z-index:10;
+   /* margin:-15px 0*/
+   	backface-visibility:hidden;
+    -webkit-transition:all .5s;
+    -moz-transition:all .5s;
+    transition:all .5s
+}
+.col figure figcaption{
+	top:0;
+    left:0;
+    width:250px;
+    height:250px;
+    padding:5px 47px 5px 5px;
+    background-color:rgba(0,0,0,0.9);
+    text-align:left;
+    backface-visibility:hidden;
+    -webkit-transform:rotateY(-180deg);
+    -moz-transform:rotateY(-180deg);
+    transform:rotateY(-180deg);
+    -webkit-transition:all .5s;
+    -moz-transition:all .5s;
+    transition:all .5s;
+    display:block;
+    position:absolute;
+    z-index:5;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box
+  }
+.col figure:hover .image,figure.hover .image {
+    -webkit-transform:rotateY(180deg);
+    -moz-transform:rotateY(180deg);
+    transform:rotateY(180deg)
+}
+.col figure:hover figcaption,figure.hover figcaption {
+    -webkit-transform:rotateY(0);
+    -moz-transform:rotateY(0);
+    transform:rotateY(0)
+}
+
+  </style>
+</head>
+
+<body class="">
+  <div class="wrapper">
+    <div class="sidebar" data-color="rose" data-background-color="black" data-image="../static/img/sidebar-1.jpg">
+      <!--
+        Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+
+        Tip 2: you can also add an image using data-image tag
+    -->
+      
+      <div class="sidebar-wrapper">
+        <div class="user">
+          <div class="photo">
+            <!-- <img src="../static/img/faces/avatar.jpg" /> -->
+          </div>
+          <div class="user-info">
+            <a data-toggle="collapse" href="#collapseExample" class="username">
+              <span>
+                {{session.username}}
                 
-            </tr>
-        {% endfor %}
-    </table>
-{% endblock %}
+              </span>
+            </a>
+            
+          </div>
+        </div>
+        <ul class="nav">
+          <li class="nav-item active ">
+            <a class="nav-link" href="">
+              <i class="material-icons">dashboard</i>
+              <p> Dashboard </p>
+            </a>
+          </li>
+          
+          <li class="nav-item ">
+            <a class="nav-link" href="/logout">
+              <i class="material-icons">date_range</i>
+              <p> Logout</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-transparent  navbar-absolute fixed-top">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <div class="navbar-minimize">
+              <button id="minimizeSidebar" class="btn btn-just-icon btn-white btn-fab btn-round">
+                <i class="material-icons text_align-center visible-on-sidebar-regular">more_vert</i>
+                <i class="material-icons design_bullet-list-67 visible-on-sidebar-mini">view_list</i>
+              </button>
+            </div>
+            <a class="navbar-brand" href="#pablo">Dashboard</a>
+          </div>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+            <span class="navbar-toggler-icon icon-bar"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav"> 
+              <li class="nav-item dropdown">
+                <a class="nav-link" href="#pablo" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="material-icons">notifications</i>
+                  <span class="notification">5</span>
+                  <p>
+                    <span class="d-lg-none d-md-block">Some Actions
+                      <b class="caret"></b>
+                    </span>
+
+                  </p>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="dropdown-item" href="#pablo">Mike John responded to your email</a>
+                  <a class="dropdown-item" href="#pablo">You have 5 new tasks</a>
+                  <a class="dropdown-item" href="#pablo">You're now friend with Andrew</a>
+                  <a class="dropdown-item" href="#pablo">Another Notification</a>
+                  <a class="dropdown-item" href="#pablo">Another One</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+      <div class="content">
+            <div class="container-fluid">      
+                    
+                            {% for candidate in candidates %}
+                        <div class="row">
+                            <div class="col" style="margin-left: 25%;">
+                                <figure>
+                                    <img class="image" src="../static/img/{{candidate.PhotoLink}}" style="width: 250px; height: 250px; border: 2px solid grey;">
+                                    <figcaption data-background-color="black">
+                                            <p style="color: white; font-size: 20px;margin-left:30px;margin-top: 30px;">{{candidate.EduQua}}</p>
+                                            <a href="vote_candidate/{{candidate.AadhaarNumber}}"><button class="btn btn-fill btn-rose" style="margin-left: 50px;margin-top: 15%;">Vote</button></a>
+                                            
+                                            
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </div> <br>
+                            {% endfor %}
+                            
+                            
+                        
+            </div>
+        </div>      
+   
+</body>
+<!--   Core JS Files   -->
+<script src="../static/js/core/jquery.min.js"></script>
+<script src="../static/js/core/popper.min.js"></script>
+<script src="../static/js/bootstrap-material-design.js"></script>
+<script src="../static/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+
+<!--  Plugin for Date Time Picker and Full Calendar Plugin  -->
+<script src="../static/js/plugins/moment.min.js"></script>
+<!--	Plugin for the Datepicker, full documentation here: https://github.com/Eonasdan/bootstrap-datetimepicker -->
+<script src="../static/js/plugins/bootstrap-datetimepicker.min.js"></script>
+<!--	Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+<script src="../static/js/plugins/nouislider.min.js"></script>
+<!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+<script src="../static/js/plugins/bootstrap-selectpicker.js"></script>
+<!--	Plugin for Tags, full documentation here: http://xoxco.com/projects/code/tagsinput/  -->
+<script src="../static/js/plugins/bootstrap-tagsinput.js"></script>
+<!--	Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script src="../static/js/plugins/jasny-bootstrap.min.js"></script>
+<!-- Plugins for presentation and navigation  -->
+<script src="../static/assets-for-demo/js/modernizr.js"></script>
+<!-- Material Dashboard Core initialisations of plugins and Bootstrap Material Design Library -->
+<script src="../static/js/material-dashboard.js?v=2.0.1"></script>
+<!-- Dashboard scripts -->
+<!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<!-- Library for adding dinamically elements -->
+<script src="../static/js/plugins/arrive.min.js" type="text/javascript"></script>
+<!-- Forms Validations Plugin -->
+<script src="../static/js/plugins/jquery.validate.min.js"></script>
+<!--  Charts Plugin, full documentation here: https://gionkunz.github.io/chartist-js/ -->
+<script src="../static/js/plugins/chartist.min.js"></script>
+<!--  Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+<script src="../static/js/plugins/jquery.bootstrap-wizard.js"></script>
+<!--  Notifications Plugin, full documentation here: http://bootstrap-notify.remabledesigns.com/    -->
+<script src="../static/js/plugins/bootstrap-notify.js"></script>
+<!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+<script src="../static/js/plugins/jquery-jvectormap.js"></script>
+<!-- Sliders Plugin, full documentation here: https://refreshless.com/nouislider/ -->
+<script src="../static/js/plugins/nouislider.min.js"></script>
+<!--  Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+<script src="../static/js/plugins/jquery.select-bootstrap.js"></script>
+<!--  DataTables.net Plugin, full documentation here: https://datatables.net/    -->
+<script src="../static/js/plugins/jquery.datatables.js"></script>
+<!-- Sweet Alert 2 plugin, full documentation here: https://limonte.github.io/sweetalert2/ -->
+<script src="../static/js/plugins/sweetalert2.js"></script>
+<!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script src="../static/js/plugins/jasny-bootstrap.min.js"></script>
+<!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+<script src="../static/js/plugins/fullcalendar.min.js"></script>
+<!-- demo init -->
+<script src="../static/js/plugins/demo.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    //init wizard
+
+    demo.initMaterialWizard();
+
+    // Javascript method's body can be found in assets/js/demos.js
+    demo.initDashboardPageCharts();
+
+    demo.initCharts();
+
+  });
+</script>
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    demo.initVectorMap();
+  });
+</script>
+
+</html>
+
+
+
+
+
+

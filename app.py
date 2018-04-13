@@ -85,11 +85,11 @@ def register():
         email_id =form.email_id.data
         password = sha256_crypt.encrypt(str(form.password.data))
         cur =mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
+        result = cur.execute("SELECT AadhaarNumber FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
         if result>0 :
             flash('Already a user! Try logging in','danger')
             return redirect(url_for('login'))
-        result = cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
+        result = cur.execute("SELECT PinCode FROM City WHERE PinCode=%s",[pincode])
         if result == 0:
             flash('Not a Valid Pincode','danger')
             return render_template('register.html',form=form)
@@ -100,8 +100,6 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html',form=form)
 
-
-# check if user logged in
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -113,9 +111,6 @@ def is_logged_in(f):
     return wrap
 
 class CandidateRegisterform(Form):
-    # aadhaar_no = StringField('',[validators.Required(),validators.Length(min=12,max=12),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
-    # state = state = StringField(label='state', 
-        # choices=[(state, state) for state in rows])
     eduqua = StringField('Edu*',[validators.Length(min=1,max=50)])
     password = PasswordField('',[validators.DataRequired()])
     
@@ -130,7 +125,7 @@ def register_candidate():
         return redirect(url_for('logout'))
     rows = []
     cur =mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM Constituency WHERE StartStopNomination= 0")
+    result = cur.execute("SELECT * FROM Constituency WHERE StartStopNomination= 1")
     if result == 0 :
         flash('Nominations are not Open for any state','danger')
         return redirect(url_for('dashboard'))
@@ -178,7 +173,6 @@ class Loginform(Form):
     aadhaar_no = StringField('',[validators.DataRequired()])
     password = PasswordField('',[validators.DataRequired()])
 
-#user login
 @app.route('/login',methods=['GET','POST'])
 def login():
     if 'logged_in' in session:
@@ -189,7 +183,7 @@ def login():
         username = form.aadhaar_no.data
         password_candidate = form.password.data
         cur =mysql.connection.cursor()
-        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+        result = cur.execute("SELECT Password FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
             data = cur.fetchone()
             password = data['Password']
@@ -703,7 +697,6 @@ def results():
     return render_template('results.html',constituencies=constituencies)
 
 @app.route('/result/<string:Constituency>', methods=['GET','POST'])
-@is_logged_in
 def result(Constituency):
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT ShowHideResults FROM Constituency WHERE State = %s ",[Constituency])
