@@ -15,37 +15,45 @@
         <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,300' rel='stylesheet' type='text/css'>
         <link href="../static/css/pe-icon-7-stroke.css" rel="stylesheet" />
+        <style>
+            .parallax 
+            {
+            background-image: url('../static/img/bg.jpg');
+            
+            }
+            
+        </style>
     </head>
     <body class="landing-page landing-page2">
         <!-- <nav class="navbar navbar-transparent navbar-top" role="navigation"> -->
-        <nav class="navbar navbar-top" role = "navigation" style="background-color: white;">
-        <div class="container-fluid" style="background-color: white;">
+        <nav class="navbar navbar-top" role = "navigation" style="background-color: rgba(0,0,0,0);">
+        <div class="container-fluid">
           
           <ul class="nav navbar-left">
-            <li><a href="/">Home</a></li>
+            <li><a href="/" style="color: white">Home</a></li>
           </ul>
           <ul class="nav navbar-left">
-            <li><a href="/about">About</a></li>
+            <li><a href="/about" style="color: white">About</a></li>
           </ul>
           {% if session.logged_in %}
             <ul class="nav navbar-right">
-              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/dashboard" style="color: white">Dashboard</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/logout">Logout</a></li>
+              <li><a href="/logout" style="color: white">Logout</a></li>
             </ul>
           {% else %}
             <ul class="nav navbar-right">
-              <li><a href="/login">Login as Voter/Candidate</a></li>
+              <li><a href="/login" style="color: white">Login as Voter/Candidate</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/login_electionofficer">Login as Election Officer</a></li>
+              <li><a href="/login_electionofficer" style="color: white">Login as Election Officer</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/register">Register as Voter</a></li>
+              <li><a href="/register" style="color: white">Register as Voter</a></li>
             </ul>
             <ul class="nav navbar-left">
-                    <li><a href="/results">Results</a></li>
+                    <li><a href="/results" style="color: white">Results</a></li>
             </ul>
             
 
@@ -53,20 +61,15 @@
         </div>
       </nav>
         <div class="wrapper">
-            <div class="parallax filter-gradient red" data-color="blue">
+            <div class="parallax filter-gradient" data-color="blue">
                 <div class= "container">
                     <div class="row">
 s                        <div class="col-md-5" style="margin-left: 28%;">
                             <div class="description text-center">
-                                <h2>Mobile Voting- A Web Application</h2>
+                                <h2>Online Voting- A Web Application</h2>
                                 <br>
-                                <h5>This is an application made to enable Mobile or Remote Voting on a large scale on a National level. To get started you could scroll down to know more about how it works or register as a candidate here:-</h5>
-                                <div class="buttons">
-                                    <a href="/register" class="btn btn-fill btn-neutral">
-                                    <i class="fa"></i> Register as Voter
-                                    </a>
-                                </div>
-
+                                
+                               
                             </div>
                         </div>
                     </div>
