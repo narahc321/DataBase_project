@@ -304,8 +304,13 @@ def withdraw():
         flash('Invalid User')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
-    cur.execute('SELECT Constituency from')
     username = session['username']
+    cur.execute('SELECT StartStopNomination from Constituency,Candidate WHERE Constituency.State=Candidate.Constituency AND AadhaarNumber=%s',[username])
+    data = cur.fetchone()
+    startstopnomination = data['StartStopNomination']
+    if startstopnomination == 0:
+        cur.close()
+        return redirect(url_for('dashboard'))    
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
     cur.close()
@@ -401,7 +406,7 @@ def vote_cast():
         return redirect(url_for('dashboard'))
     username = session['username']
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s", [username])
+    cur.execute("SELECT VotingStatus,PinCode FROM Voter WHERE AadhaarNumber=%s", [username])
     user_details = cur.fetchone()
     if user_details['VotingStatus'] == 1 :
         flash('Already Casted Vote', 'danger')
@@ -410,7 +415,7 @@ def vote_cast():
     cur.execute("SELECT State FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
     constituency = city_details['State']
-    cur.execute('SELECT * from Candidate where Constituency=%s AND Validate = 1',[constituency])
+    cur.execute('SELECT * from Candidate NATURAL JOIN Voter where Constituency=%s AND Validate = 1',[constituency])
     candidates = cur.fetchall()
     return render_template('vote_cast.html',candidates=candidates )
 
@@ -673,7 +678,7 @@ def validate(AadhaarNumber):
     cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
-    result = cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    result = cur.execute("SELECT Constituency from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     if result == 0:
         flash('Does not exsist','danger')
         cur.close()
@@ -713,18 +718,17 @@ def result(Constituency):
         cur.close()
         flash('results are not open for this constituency')
         return redirect(url_for('results'))
-    result = cur.execute("SELECT * from Candidate WHERE Constituency= %s AND Validate = 1 ORDER BY NumberOfVotes DESC",[Constituency])
-    print result
+    result = cur.execute('SELECT * from Candidate NATURAL JOIN Voter where Constituency=%s AND Validate = 1 ORDER BY NumberOfVotes DESC',[constituency])
     if result == 0:
         flash('No one participated','danger')
         cur.close()
         return redirect(url_for('results'))
     candidates = cur.fetchall()
     cur.close()
-    print candidates
     return render_template('result.html',candidates=candidates)
 
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
+    # app.run(host='0.0.0.0')
 
