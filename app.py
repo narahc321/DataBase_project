@@ -718,7 +718,7 @@ def result(Constituency):
         cur.close()
         flash('results are not open for this constituency')
         return redirect(url_for('results'))
-    result = cur.execute('SELECT * from Candidate NATURAL JOIN Voter where Constituency=%s AND Validate = 1 ORDER BY NumberOfVotes DESC',[constituency])
+    result = cur.execute('SELECT * from Candidate NATURAL JOIN Voter where Constituency=%s AND Validate = 1 ORDER BY NumberOfVotes DESC',[Constituency])
     if result == 0:
         flash('No one participated','danger')
         cur.close()
