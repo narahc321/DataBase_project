@@ -12,6 +12,7 @@ from flask_uploads import UploadSet,configure_uploads,IMAGES
 from flask_wtf import RecaptchaField
 from wtforms import ValidationError
 from authy.api import AuthyApiClient
+from flask_mail import Mail, Message
 
 
 app = Flask(__name__)
@@ -25,10 +26,17 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
 app.config['RECAPTCHA_PUBLIC_KEY'] = '6LeGolAUAAAAANEcOrlm1_SBbAqbUtHEm_-ImdAK'
 app.config['RECAPTCHA_PRIVATE_KEY'] = '6LeGolAUAAAAAOSbI3-pRhY_QuaRZgvUJtEJScJQ'
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'charancharancharancharancharan@gmail.com'
+app.config['MAIL_PASSWORD'] = 'saicharanteja'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 authy_api = AuthyApiClient('xeBa90E2swVpTZOXwljn2ksUxicPdQM3')
 
 #init MYSQL
 mysql = MySQL(app)
+mail=Mail(app)
 
 
 @app.route('/')
@@ -51,11 +59,9 @@ class Registerform(Form):
     )
     dob = DateField('', format='%Y-%m-%d',)
     def validate_dob(self, dob):
-        print dob.data
         if dob.data == None:
             flash('Date Of Birth Required!','danger')
             raise ValidationError('Date Of Birth Required!')
-        # print (datetime.date.today() - dob.data).days
         if (datetime.date.today() - dob.data).days < 18*365 :
             flash("Under 18",'danger')
             raise ValidationError('Under 18')
@@ -109,7 +115,6 @@ def register():
 
 def send_otp(phone):
     requests = authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
-    print requests
 
 class OTPform(Form):
     otp = StringField((''),[validators.Required()])
@@ -121,7 +126,6 @@ def verify():
         return redirect(url_for('dashboard'))
     form =OTPform(request.form)
     phone = request.args.get('phone')
-    print phone
     if phone == None:
         return redirect(url_for('index'))
     if  request.method =='POST' and form.validate():
@@ -137,6 +141,11 @@ def verify():
             cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(data['Name'],data['Gender'], data['DateOfBirth'], data['AadhaarNumber'], data['PinCode'], data['MobileNumber'], data['Emailid'], data['Password']))
             cur.execute("DELETE FROM TempVoter WHERE MobileNumber = %s",[phone])
             mysql.connection.commit()
+            email = data['Emailid']
+            if email:
+                msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
+                mail.send(msg)
             flash("sucessfully registered, can login",'success')
             return redirect(url_for('login'))
         else:
@@ -313,7 +322,6 @@ def change_password():
                     return redirect(url_for('dashboard'))
                 else:
                     cur.close()
-                    print 2
                     flash('Invalid Credentials','danger')
                     return render_template('change_password.html',form=form)
         elif session['type'] == 'E' or session['type'] == 'A':
@@ -391,7 +399,6 @@ def dashboard_voter():
     pincode =  user_details['PinCode']
     cur.execute("SELECT * FROM City WHERE PinCode=%s",[pincode])
     city_details = cur.fetchone()
-    print city_details
     cur.close()
     return render_template('dashboard.html', user_details=user_details,city_details=city_details )
 
@@ -473,11 +480,12 @@ def vote_candidate(AadhaarNumber):
         return redirect(url_for('dashboard'))
     username = session['username']
     cur = mysql.connection.cursor()
-    result=cur.execute("SELECT VotingStatus FROM Voter WHERE AadhaarNumber=%s", [username])
+    result=cur.execute("SELECT VotingStatus,Emailid FROM Voter WHERE AadhaarNumber=%s", [username])
     if result == 0:
         flash('candidate does not exist','danger')
         return redirect(url_for('dashboard'))
     user_details = cur.fetchone()
+    email = user_details['Emailid']
     if user_details['VotingStatus'] == 1 :
         flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
@@ -498,7 +506,11 @@ def vote_candidate(AadhaarNumber):
                 mysql.connection.commit()
                 cur.execute("UPDATE Voter SET VotingStatus = %s WHERE AadhaarNumber = %s",(1,username))
                 mysql.connection.commit()
-                flash('Voting Succeful', 'success')
+                flash('Voting Successful', 'success')
+                if email:
+                    msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                    msg.body = "Dear " + data['Name'] + ", you have successfully casted your vote"
+                    mail.send(msg)
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid Credentials')
@@ -567,7 +579,6 @@ def StartStop_elections():
     constituency = data['Constituency']
     cur.execute("SELECT StartStopElection FROM Constituency WHERE State = %s ",[constituency])
     data =cur.fetchone()
-    print data
     status = 1 - data['StartStopElection']
     cur.execute("UPDATE Constituency SET  StartStopElection = %s WHERE State = %s ",[status,constituency])
     mysql.connection.commit()
@@ -746,7 +757,6 @@ def results():
     cur = mysql.connection.cursor()
     cur.execute('SELECT State FROM Constituency WHERE ShowHideResults = 1')
     constituencies = cur.fetchall()
-    print constituencies
     return render_template('results.html',constituencies=constituencies)
 
 @app.route('/result/<string:Constituency>', methods=['GET','POST'])
