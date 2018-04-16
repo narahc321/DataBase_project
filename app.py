@@ -88,6 +88,8 @@ def register():
         password = sha256_crypt.encrypt(str(form.password.data))
         cur =mysql.connection.cursor()
         result = cur.execute("SELECT AadhaarNumber FROM Voter WHERE AadhaarNumber=%s",[aadhaar_no])
+        cur.execute("DELETE FROM TempVoter WHERE AadhaarNumber=%s",[aadhaar_no])
+        mysql.connection.commit()
         if result>0 :
             flash('Already a user! Try logging in','danger')
             return redirect(url_for('login'))
@@ -102,7 +104,7 @@ def register():
         cur.close()
         flash('verify otp valid only for 60 seconds', 'success')
         send_otp(phone)
-        return redirect(url_for('verify'))
+        return redirect(url_for('verify',phone=phone))
     return render_template('register.html',form=form)
 
 def send_otp(phone):
@@ -110,7 +112,6 @@ def send_otp(phone):
     print requests
 
 class OTPform(Form):
-    phone = StringField('',[validators.Required(),validators.Length(min=10,max=11),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
     otp = StringField((''),[validators.Required()])
 
 @app.route('/verify',methods=['GET','POST'])
@@ -119,8 +120,11 @@ def verify():
         flash('logout to register','danger')
         return redirect(url_for('dashboard'))
     form =OTPform(request.form)
+    phone = request.args.get('phone')
+    print phone
+    if phone == None:
+        return redirect(url_for('index'))
     if  request.method =='POST' and form.validate():
-        phone = form.phone.data
         otp = form.otp.data
         check = authy_api.phones.verification_check(phone, '91', otp)
         if check.ok():
@@ -128,7 +132,7 @@ def verify():
             result = cur.execute("select * from TempVoter WHERE MobileNumber = %s",[phone])
             if result == 0:
                 flash('mobile Number not registered','danger')
-                return render_template('verify.html',form=form)
+                return render_template('verify.html',form=form,phone=phone)
             data = cur.fetchone()
             cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(data['Name'],data['Gender'], data['DateOfBirth'], data['AadhaarNumber'], data['PinCode'], data['MobileNumber'], data['Emailid'], data['Password']))
             cur.execute("DELETE FROM TempVoter WHERE MobileNumber = %s",[phone])
@@ -137,7 +141,7 @@ def verify():
             return redirect(url_for('login'))
         else:
             flash('wrong otp','danger')
-    return render_template('verify.html',form=form)
+    return render_template('verify.html',form=form,phone=phone)
 
 
 def is_logged_in(f):
