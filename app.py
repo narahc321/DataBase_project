@@ -114,7 +114,7 @@ def register():
     return render_template('register.html',form=form)
 
 def send_otp(phone):
-    requests = authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
+    authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
 
 class OTPform(Form):
     otp = StringField((''),[validators.Required()])
