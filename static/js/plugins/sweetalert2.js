@@ -136,7 +136,7 @@
         '<textarea class="' + swalClasses.textarea + '"></textarea>' +
         '<div class="' + swalClasses.validationerror + '"></div>' +
         '<hr class="' + swalClasses.spacer + '">' +
-        '<button type="button" class="' + swalClasses.confirm + '">OK</button>' +
+        '<a href="/withdraw"><button type="button" class="' + swalClasses.confirm + '">OK</button</a>' +
         '<button type="button" class="' + swalClasses.cancel + '">Cancel</button>' +
         '<span class="' + swalClasses.close + '">&times;</span>' +
         '</div>'

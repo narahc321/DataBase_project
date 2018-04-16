@@ -11,6 +11,8 @@ from flask_wtf.file import FileField,FileAllowed,FileRequired
 from flask_uploads import UploadSet,configure_uploads,IMAGES 
 from flask_wtf import RecaptchaField
 from wtforms import ValidationError
+from authy.api import AuthyApiClient
+
 
 app = Flask(__name__)
 
@@ -23,7 +25,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
 app.config['RECAPTCHA_PUBLIC_KEY'] = '6LeGolAUAAAAANEcOrlm1_SBbAqbUtHEm_-ImdAK'
 app.config['RECAPTCHA_PRIVATE_KEY'] = '6LeGolAUAAAAAOSbI3-pRhY_QuaRZgvUJtEJScJQ'
-
+authy_api = AuthyApiClient('xeBa90E2swVpTZOXwljn2ksUxicPdQM3')
 
 #init MYSQL
 mysql = MySQL(app)
@@ -93,12 +95,50 @@ def register():
         if result == 0:
             flash('Not a Valid Pincode','danger')
             return render_template('register.html',form=form)
-        cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, pincode, phone, email_id, password))
+        cur.execute("DELETE FROM TempVoter WHERE MobileNumber = %s",[phone])
+        mysql.connection.commit()
+        cur.execute("INSERT INTO TempVoter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, pincode, phone, email_id, password))
         mysql.connection.commit()
         cur.close()
-        flash('you are now registered and can log in', 'success')
-        return redirect(url_for('login'))
+        flash('verify otp valid only for 60 seconds', 'success')
+        send_otp(phone)
+        return redirect(url_for('verify'))
     return render_template('register.html',form=form)
+
+def send_otp(phone):
+    requests = authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
+    print requests
+
+class OTPform(Form):
+    phone = StringField('',[validators.Required(),validators.Length(min=10,max=11),validators.Regexp(regex=r'^[0-9]*$', message="Only Numbers are allowed")])
+    otp = StringField((''),[validators.Required()])
+
+@app.route('/verify',methods=['GET','POST'])
+def verify():
+    if 'logged_in' in session:
+        flash('logout to register','danger')
+        return redirect(url_for('dashboard'))
+    form =OTPform(request.form)
+    if  request.method =='POST' and form.validate():
+        phone = form.phone.data
+        otp = form.otp.data
+        check = authy_api.phones.verification_check(phone, '91', otp)
+        if check.ok():
+            cur =mysql.connection.cursor()
+            result = cur.execute("select * from TempVoter WHERE MobileNumber = %s",[phone])
+            if result == 0:
+                flash('mobile Number not registered','danger')
+                return render_template('verify.html',form=form)
+            data = cur.fetchone()
+            cur.execute("INSERT INTO Voter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(data['Name'],data['Gender'], data['DateOfBirth'], data['AadhaarNumber'], data['PinCode'], data['MobileNumber'], data['Emailid'], data['Password']))
+            cur.execute("DELETE FROM TempVoter WHERE MobileNumber = %s",[phone])
+            mysql.connection.commit()
+            flash("sucessfully registered, can login",'success')
+            return redirect(url_for('login'))
+        else:
+            flash('wrong otp','danger')
+    return render_template('verify.html',form=form)
+
 
 def is_logged_in(f):
     @wraps(f)

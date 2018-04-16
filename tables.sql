@@ -1,4 +1,4 @@
-CREATE DATABASE MobileVoting;
+					CREATE DATABASE MobileVoting;
 USE MobileVoting;
 
 CREATE TABLE Voter(
@@ -122,3 +122,15 @@ INSERT INTO Constituency (STATE) VALUES("WEST BENGAL");
 
 ALTER TABLE `MobileVoting`.`Constituency` 
 ADD COLUMN `ShowHideResults` INT(11) NULL DEFAULT 0 AFTER `StartStopNomination`;
+
+CREATE TABLE `MobileVoting`.`TempVoter` (
+  `Name` VARCHAR(100) NULL,
+  `Gender` VARCHAR(20) NULL,
+  `DateOfBirth` DATE NULL,
+  `AadhaarNumber` VARCHAR(20) NOT NULL,
+  `PinCode` VARCHAR(50) NULL,
+  `MobileNumber` VARCHAR(50) NULL,
+  `Emailid` VARCHAR(50) NULL,
+  `Password` VARCHAR(225) NULL,
+  `VotingStatus` INT NULL DEFAULT 0,
+  PRIMARY KEY (`AadhaarNumber`));
