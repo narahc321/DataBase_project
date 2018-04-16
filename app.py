@@ -201,15 +201,20 @@ def register_candidate():
         if result > 0:
             flash('Already Applied!','danger')
             return redirect(url_for('login'))
-        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+        result = cur.execute("SELECT Password,Emailid,Name FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
             data = cur.fetchone()
             password = data['Password']
+            email = data['Emailid']
             if sha256_crypt.verify(password_candidate, password):
                 cursor =mysql.connection.cursor()
                 cursor.execute("INSERT INTO Candidate(AadhaarNumber,PhotoLink,SignatureLink,EduQua,Constituency) VALUES(%s,%s,%s,%s,%s)",(username,PhotoLink,SignatureLink,eduqua,state))
                 mysql.connection.commit()
                 cursor.close()
+                if email:
+                    msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                    msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
+                    mail.send(msg)
                 session['type']='C'
                 flash('you are now succesfully applied', 'success')
                 return redirect(url_for('dashboard'))
@@ -365,6 +370,13 @@ def withdraw():
         return redirect(url_for('dashboard'))    
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
+    cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber=%s"[username])
+    data = cur.fetchone()
+    email = data['Emailid']
+    if email:
+        msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
+        mail.send(msg)
     cur.close()
     session['type'] = 'V'
     flash('you have succesfully withdrawn','success')
@@ -495,7 +507,7 @@ def vote_candidate(AadhaarNumber):
     username = session['username']
     if request.method == 'POST' and form.validate():
         password_voter = form.password.data
-        result = cur.execute("SELECT * FROM Voter WHERE AadhaarNumber=%s",[username])
+        result = cur.execute("SELECT Password,Name FROM Voter WHERE AadhaarNumber=%s",[username])
         if result>0 :
             data = cur.fetchone()
             password = data['Password']
@@ -746,6 +758,16 @@ def validate(AadhaarNumber):
     cur.execute("SELECT Validate FROM Candidate WHERE AadhaarNumber = %s ",[AadhaarNumber])
     data = cur.fetchone()
     status = 1 - data['Validate']
+    cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber = %s ",[AadhaarNumber])
+    email_data = cur.fetchone()
+    email = email_data['Emailid']
+    if email:
+        msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        if status == 1:
+            msg.body = "Dear " + email_data['Name'] + ", you are now eligible to participate for elections"
+        else:
+            msg.body = "Dear " + email_data['Name'] + ", your nomination is removed for elections"
+        mail.send(msg)
     cur.execute("UPDATE Candidate set Validate = %s WHERE AadhaarNumber = %s ",[status,AadhaarNumber])
     mysql.connection.commit()
     cur.close()
