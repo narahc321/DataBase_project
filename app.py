@@ -20,7 +20,7 @@ app = Flask(__name__)
 # config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '0987654321'
+app.config['MYSQL_PASSWORD'] = 'iiita123'
 app.config['MYSQL_DB'] = 'MobileVoting'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'
@@ -679,7 +679,7 @@ def validate_candidates():
     cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
     data = cur.fetchone()
     constituency = data['Constituency']
-    cur.execute("SELECT AadhaarNumber, Validate FROM Candidate WHERE Constituency = %s ",[constituency])
+    cur.execute("SELECT AadhaarNumber, Validate,Name FROM Candidate NATURAL JOIN Voter WHERE Constituency = %s ",[constituency])
     candidates =cur.fetchall()
     cur.close()
     return render_template('validate_candidates.html',candidates = candidates)

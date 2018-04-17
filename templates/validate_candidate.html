@@ -130,17 +130,29 @@
                     <b>Education Qualifications : </b>{{candidate_details.EduQua }}<br><br>
                     <div class="row">
                       <div class="col-md-4">
-                        <img src="../static/img/{{candidate_details.PhotoLink }}">
+                        <img width="150" src="../static/img/{{candidate_details.PhotoLink }}">
                       </div>
                       <div class="col-md-4">
-                        <img src="../static/img/{{candidate_details.SignatureLink }}">
+                        <img width="150" src="../static/img/{{candidate_details.SignatureLink }}">
                       </div>
                     </div>
                     <br>
-                    <form action="{{url_for('validate', AadhaarNumber = voter_details.AadhaarNumber ) }}" method="post">
-                        <input type="hidden" name ="method" value="VALIDATE">
-                        <input type="submit" value="Validate" class="btn btn-danger">
-                    </form>
+                    
+                    {% if candidate_details.Validate %}
+                            <td>
+                            
+                              <form action="{{url_for('validate', AadhaarNumber = voter_details.AadhaarNumber ) }}" method="post">
+                                <input type="hidden" name ="method" value="DE-VALIDATE">
+                                <input type="submit" value="DE-VALIDATE" class="btn btn-danger">
+                            </form>                              
+                            </td>
+                            {% else %}
+                            <td>
+                              <form action="{{url_for('validate', AadhaarNumber = voter_details.AadhaarNumber ) }}" method="post">
+                                <input type="hidden" name ="method" value="VALIDATE">
+                                <input type="submit" value="Validate" class="btn btn-success">
+                            </form>                                  </td>
+                            {% endif %}
                 </div>
             </div>
           

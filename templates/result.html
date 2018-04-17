@@ -130,7 +130,11 @@
                                 <table class="table">
                                         <thead class=" text-primary">
                                           <th>
-                                            Candidate Aadhaar Number
+                                            Candidate Name/<br>
+                                            AadhaarNumber
+                                          </th>
+                                          <th>
+                                            Symbol
                                           </th>
                                           <th>
                                               Number of Votes
@@ -140,8 +144,16 @@
                                           {% for candidate in candidates %}
                                           <tr>
                                             <td style="font-size: 18px">
+                                              <b>{{candidate.Name}}</b></br>
                                               <b>{{candidate.AadhaarNumber}}</b>
                                             </td>
+                                            <td style="font-size: 18px">
+                                              <div class="row">
+                                                <div class="col-md-4">
+                                                  <img width="100" src="../static/img/{{candidate.PhotoLink }}">
+                                                </div>
+                                            </td>
+                                            
                                             <td style="font-size: 18px">
                                                 <b>{{candidate.NumberOfVotes}}</b>
                                             </td>      
