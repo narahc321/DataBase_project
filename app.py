@@ -20,7 +20,7 @@ app = Flask(__name__)
 # config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'iiita123'
+app.config['MYSQL_PASSWORD'] = '0987654321'
 app.config['MYSQL_DB'] = 'MobileVoting'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['UPLOADED_PHOTOS_DEST'] = 'static/img'

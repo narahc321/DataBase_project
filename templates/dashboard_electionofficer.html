@@ -118,10 +118,10 @@
               <div class="card card-wizard" data-color="rose" id="wizardProfile">
               <div class="row">
                 <div class="col-md-6" style="margin-top: 15px;margin-left: 50px">
-                  <b>Number Of voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</b></br>
-                  <b>Number Of votes casted = {{ voter_stats['SUM(VotingStatus)'] }}</b></br>
-                  <b>Number Of candidates applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</b></br>
-                  <b>Number Of candidates eligible = {{ candidate_stats['SUM(Validate)'] }}</b>
+                  <b>Number of Voters = {{ voter_stats['COUNT(AadhaarNumber)'] }}</b></br><br>
+                  <b>Number of Votes Casted = {{ voter_stats['SUM(VotingStatus)'] }}</b></br><br>
+                  <b>Number of Candidates Applied = {{ candidate_stats['COUNT(AadhaarNumber)'] }}</b></br><br>
+                  <b>Number of Candidates Eligible = {{ candidate_stats['SUM(Validate)'] }}</b>
                 </div>
                 <div class="col-md-4" style="margin-top: 15px;">
                         {% if constituency_details.StartStopElection %}
