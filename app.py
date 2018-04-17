@@ -116,6 +116,12 @@ def register():
 def send_otp(phone):
     authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
 
+def send_mail(email,msg):
+    if email:
+        msge = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        msge.body = msg
+        mail.send(msge)
+
 class OTPform(Form):
     otp = StringField((''),[validators.Required()])
 

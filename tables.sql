@@ -48,36 +48,6 @@ CREATE TABLE Constituency(
 	PRIMARY KEY (Id)
 );
 
-INSERT INTO Constituency (STATE) VALUES("Andhra Pradesh");
-INSERT INTO Constituency (STATE) VALUES("Arunachal Pradesh");
-INSERT INTO Constituency (STATE) VALUES("Assam");
-INSERT INTO Constituency (STATE) VALUES("Bihar");
-INSERT INTO Constituency (STATE) VALUES("Chhattisgarh");
-INSERT INTO Constituency (STATE) VALUES("Goa");
-INSERT INTO Constituency (STATE) VALUES("Gujarat");
-INSERT INTO Constituency (STATE) VALUES("Haryana");
-INSERT INTO Constituency (STATE) VALUES("Himachal Pradesh");
-INSERT INTO Constituency (STATE) VALUES("Jammu And Kashmir");
-INSERT INTO Constituency (STATE) VALUES("Jharkhand");
-INSERT INTO Constituency (STATE) VALUES("Karnataka");
-INSERT INTO Constituency (STATE) VALUES("Kerala");
-INSERT INTO Constituency (STATE) VALUES("Madhya Pradesh");
-INSERT INTO Constituency (STATE) VALUES("Maharashtra");
-INSERT INTO Constituency (STATE) VALUES("Manipur");
-INSERT INTO Constituency (STATE) VALUES("Meghalaya");
-INSERT INTO Constituency (STATE) VALUES("Mizoram");
-INSERT INTO Constituency (STATE) VALUES("Nagaland");
-INSERT INTO Constituency (STATE) VALUES("Odisha");
-INSERT INTO Constituency (STATE) VALUES("Punjab");
-INSERT INTO Constituency (STATE) VALUES("Rajasthan");
-INSERT INTO Constituency (STATE) VALUES("Sikkim");
-INSERT INTO Constituency (STATE) VALUES("Tamil Nadu");
-INSERT INTO Constituency (STATE) VALUES("Telangana");
-INSERT INTO Constituency (STATE) VALUES("Tripura");
-INSERT INTO Constituency (STATE) VALUES("Uttarakhand");
-INSERT INTO Constituency (STATE) VALUES("Uttar Pradesh");
-INSERT INTO Constituency (STATE) VALUES("West Bengal");
-
 
 LOAD DATA LOCAL INFILE "/home/anagh/states.txt" INTO TABLE Constituency;
 LOAD DATA LOCAL INFILE "/home/anagh/pincode.txt" INTO TABLE City;
