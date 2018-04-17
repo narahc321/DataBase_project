@@ -61,23 +61,17 @@
           </li>
           <hr>
           <li class="nav-item ">
-                <a class="nav-link" href="/add_electionofficer">
-                  <i class="material-icons">date_range</i>
-                  <p> Add Election Officer</p>
-                </a>
-           </li>
-           <li class="nav-item ">
-            <a class="nav-link" href="/admin_viewvoters">
+            <a class="nav-link" href="/admin">
               <i class="material-icons">date_range</i>
-              <p> View Voters</p>
+              <p> View Election Officers</p>
             </a>
-          </li>
           <li class="nav-item ">
             <a class="nav-link" href="/logout">
               <i class="material-icons">date_range</i>
               <p> Logout</p>
             </a>
           </li>
+
         </ul>
       </div>
     </div>
@@ -141,7 +135,7 @@
                   <div class="card-icon">
                     <i class="material-icons">fingerprint</i>
                   </div>
-                  <h4 class="card-title">Manage the Election Officers</h4>
+                  <h4 class="card-title">Manage the Election voters</h4>
                   <br><br>
 
                 </div>
@@ -168,19 +162,19 @@
                                                             Name
                                                           </th>
                                                           <th>
-                                                              Constituency
+                                                              AadhaarNumber
                                                           </th>
                                                           <th>
-                                                                Delete Nominee
+                                                                Delete Voter
                                                             </th>
                                                         </thead>
                                                         <tbody>
-                                                                {% for officer in officers %}
+                                                                {% for voter in voters %}
                                                                 <tr>
-                                                                    <td>{{officer.UserID}}</td>
-                                                                    <td>{{officer.Constituency}}</td>
+                                                                    <td>{{voter.Name}}</td>
+                                                                    <td>{{voter.AadhaarNumber}}</td>
                                                                     <td>
-                                                                        <form action="{{url_for('remove_electionofficer', UserID=officer.UserID) }}" method="post">
+                                                                        <form action="{{url_for('remove_voter', UserID=voter.AadhaarNumber) }}" method="post">
                                                                             <input type="hidden" name ="method" value="DELETE">
                                                                             <input type="submit" value="Delete" class="btn btn-danger">
                                                                         </form>
@@ -220,13 +214,23 @@
                       <nav class="pull-left">
                         <ul>
                           <li>
-                            <a href="/about">
+                            <a href="https://www.creative-tim.com">
+                              Creative Tim
+                            </a>
+                          </li>
+                          <li>
+                            <a href="http://presentation.creative-tim.com">
                               About Us
                             </a>
                           </li>
                           <li>
-                            <a href="/">
-                              Home
+                            <a href="http://blog.creative-tim.com">
+                              Blog
+                            </a>
+                          </li>
+                          <li>
+                            <a href="https://www.creative-tim.com/license">
+                              Licenses
                             </a>
                           </li>
                         </ul>
@@ -236,7 +240,7 @@
                         <script>
                           document.write(new Date().getFullYear())
                         </script>, made with <i class="material-icons">favorite</i> by
-                        <a href="about" target="_blank">Creative Team</a> for a better web.
+                        <a href="https://www.creative-tim.com" target="_blank">Creative Tim</a> for a better web.
                       </div>
                     </div>
                   </footer>

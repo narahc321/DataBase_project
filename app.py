@@ -370,7 +370,7 @@ def withdraw():
         return redirect(url_for('dashboard'))    
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
-    cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber=%s"[username])
+    cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber=%s",[username])
     data = cur.fetchone()
     email = data['Emailid']
     if email:
@@ -461,6 +461,33 @@ def admin():
     officers = cur.fetchall()
     cur.close()
     return render_template('admin.html',officers=officers)
+
+@app.route('/admin_viewvoters')
+@is_logged_in
+def admin_viewvoters():
+    if session['type']!='A':
+        return redirect(url_for('dashboard'))
+    cur = mysql.connection.cursor()
+    result = cur.execute('SELECT * FROM Voter ')
+    if result == 0:
+        msg = 'No Voters Registerd'
+        cur.close()
+        return render_template('admin_viewvoters.html',msg=msg)
+    voters = cur.fetchall()
+    cur.close()
+    return render_template('admin_viewvoter.html',voters=voters)
+
+@app.route('/remove_voter/<string:UserID>',methods=['POST'])
+@is_logged_in
+def remove_voter(UserID):
+    if session['type'] != 'A':
+        return redirect(url_for('dashboard'))
+    cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM Voter WHERE AadhaarNumber=%s',[UserID])
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('admin_viewvoters'))
+
 
 @app.route('/vote_cast', methods=['GET', 'POST'])
 @is_logged_in
