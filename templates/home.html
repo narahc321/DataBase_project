@@ -30,30 +30,30 @@
         <div class="container-fluid">
           
           <ul class="nav navbar-left">
-            <li><a href="/" style="color: white">Home</a></li>
+            <li><a href="/" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Home</a></li>
           </ul>
           <ul class="nav navbar-left">
-            <li><a href="/about" style="color: white">About</a></li>
+            <li><a href="/about" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">About</a></li>
           </ul>
           {% if session.logged_in %}
             <ul class="nav navbar-right">
-              <li><a href="/dashboard" style="color: white">Dashboard</a></li>
+              <li><a href="/dashboard" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Dashboard</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/logout" style="color: white">Logout</a></li>
+              <li><a href="/logout" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Logout</a></li>
             </ul>
           {% else %}
             <ul class="nav navbar-right">
-              <li><a href="/login" style="color: white">Login as Voter/Candidate</a></li>
+              <li><a href="/login" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Login as Voter/Candidate</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/login_electionofficer" style="color: white">Login as Election Officer</a></li>
+              <li><a href="/login_electionofficer" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Login as Election Officer</a></li>
             </ul>
             <ul class="nav navbar-right">
-              <li><a href="/register" style="color: white">Register as Voter</a></li>
+              <li><a href="/register" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Register as Voter</a></li>
             </ul>
             <ul class="nav navbar-left">
-                    <li><a href="/results" style="color: white">Results</a></li>
+                    <li><a href="/results" style="color: white" onmouseover="this.style.color ='gray'" onmouseout="this.style.color ='white'">Results</a></li>
             </ul>
             
 
