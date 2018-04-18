@@ -28,8 +28,8 @@ app.config['RECAPTCHA_PUBLIC_KEY'] = '6LeGolAUAAAAANEcOrlm1_SBbAqbUtHEm_-ImdAK'
 app.config['RECAPTCHA_PRIVATE_KEY'] = '6LeGolAUAAAAAOSbI3-pRhY_QuaRZgvUJtEJScJQ'
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'charancharancharancharancharan@gmail.com'
-app.config['MAIL_PASSWORD'] = 'saicharanteja'
+app.config['MAIL_USERNAME'] = 'mobilevotingteam@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Charan321'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 authy_api = AuthyApiClient('xeBa90E2swVpTZOXwljn2ksUxicPdQM3')
@@ -103,6 +103,7 @@ def register():
         if result == 0:
             flash('Not a Valid Pincode','danger')
             return render_template('register.html',form=form)
+        cur.execute("DELETE FROM TempVoter WHERE AadhaarNumber=%s",[aadhaar_no])
         cur.execute("DELETE FROM TempVoter WHERE MobileNumber = %s",[phone])
         mysql.connection.commit()
         cur.execute("INSERT INTO TempVoter(Name, Gender, DateOfBirth, AadhaarNumber, PinCode, MobileNumber, EmailId, Password) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",(name, gender, dob, aadhaar_no, pincode, phone, email_id, password))
@@ -118,7 +119,7 @@ def send_otp(phone):
 
 def send_mail(email,msg):
     if email:
-        msge = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        msge = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
         msge.body = msg
         mail.send(msge)
 
@@ -138,6 +139,7 @@ def verify():
         otp = form.otp.data
         check = authy_api.phones.verification_check(phone, '91', otp)
         if check.ok():
+        # if True:
             cur =mysql.connection.cursor()
             result = cur.execute("select * from TempVoter WHERE MobileNumber = %s",[phone])
             if result == 0:
@@ -149,7 +151,7 @@ def verify():
             mysql.connection.commit()
             email = data['Emailid']
             if email:
-                msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                msg = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
                 msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
                 mail.send(msg)
             flash("sucessfully registered, can login",'success')
@@ -218,7 +220,7 @@ def register_candidate():
                 mysql.connection.commit()
                 cursor.close()
                 if email:
-                    msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                    msg = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
                     msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
                     mail.send(msg)
                 session['type']='C'
@@ -259,7 +261,6 @@ def login():
                 if result>0 :
                     session['type'] = 'C'
                 cur.close()
-                flash('you are now logged in', 'success')
                 return redirect(url_for('dashboard'))
             else:
                 cur.close()
@@ -291,7 +292,6 @@ def login_electionofficer():
                 session['type'] = 'E'
                 if data['Constituency'] == 'INDIA':
                     session['type'] = 'A'
-                flash('you are now logged in', 'success')
                 cur.close()
                 return redirect(url_for('dashboard'))
             else:
@@ -364,28 +364,31 @@ def logout():
 @is_logged_in
 def withdraw():
     if session['type'] != 'C' :
-        flash('Invalid User')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     username = session['username']
+    result = cur.execute('SELECT AadhaarNumber from Candidate WHERE AadhaarNumber=%s',[username])
+    if result == 0:
+        session['type'] = 'V'
+        cur.close()
+        return redirect(url_for('dashboard'))
     cur.execute('SELECT StartStopNomination from Constituency,Candidate WHERE Constituency.State=Candidate.Constituency AND AadhaarNumber=%s',[username])
     data = cur.fetchone()
     startstopnomination = data['StartStopNomination']
     if startstopnomination == 0:
         cur.close()
         return redirect(url_for('dashboard'))    
+    session['type'] = 'V'
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
     cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber=%s",[username])
     data = cur.fetchone()
     email = data['Emailid']
     if email:
-        msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        msg = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
         msg.body = "Dear " + data['Name'] + ", you have successfully registerd"
         mail.send(msg)
     cur.close()
-    session['type'] = 'V'
-    flash('you have succesfully withdrawn','success')
     return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
@@ -478,7 +481,7 @@ def admin_viewvoters():
     if result == 0:
         msg = 'No Voters Registerd'
         cur.close()
-        return render_template('admin_viewvoters.html',msg=msg)
+        return render_template('admin_viewvoter.html',msg=msg)
     voters = cur.fetchall()
     cur.close()
     return render_template('admin_viewvoter.html',voters=voters)
@@ -489,6 +492,8 @@ def remove_voter(UserID):
     if session['type'] != 'A':
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM Candidate WHERE AadhaarNumber=%s',[UserID])
+    mysql.connection.commit()
     cur.execute('DELETE FROM Voter WHERE AadhaarNumber=%s',[UserID])
     mysql.connection.commit()
     cur.close()
@@ -505,7 +510,6 @@ def vote_cast():
     cur.execute("SELECT VotingStatus,PinCode FROM Voter WHERE AadhaarNumber=%s", [username])
     user_details = cur.fetchone()
     if user_details['VotingStatus'] == 1 :
-        flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
     pincode =  user_details['PinCode']
     cur.execute("SELECT State FROM City WHERE PinCode=%s",[pincode])
@@ -513,6 +517,7 @@ def vote_cast():
     constituency = city_details['State']
     cur.execute('SELECT * from Candidate NATURAL JOIN Voter where Constituency=%s AND Validate = 1',[constituency])
     candidates = cur.fetchall()
+    # print candidates
     return render_template('vote_cast.html',candidates=candidates )
 
 class Passwordform(Form):
@@ -527,14 +532,12 @@ def vote_candidate(AadhaarNumber):
     cur = mysql.connection.cursor()
     result=cur.execute("SELECT VotingStatus,Emailid FROM Voter WHERE AadhaarNumber=%s", [username])
     if result == 0:
-        flash('candidate does not exist','danger')
         return redirect(url_for('dashboard'))
     user_details = cur.fetchone()
     email = user_details['Emailid']
     if user_details['VotingStatus'] == 1 :
-        flash('Already Casted Vote', 'danger')
         return redirect(url_for('dashboard'))
-    cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
+    cur.execute("SELECT * from Candidate NATURAL JOIN Voter WHERE AadhaarNumber= %s",[AadhaarNumber])
     candidate = cur.fetchone()
     form = Passwordform(request.form)
     username = session['username']
@@ -551,14 +554,13 @@ def vote_candidate(AadhaarNumber):
                 mysql.connection.commit()
                 cur.execute("UPDATE Voter SET VotingStatus = %s WHERE AadhaarNumber = %s",(1,username))
                 mysql.connection.commit()
-                flash('Voting Successful', 'success')
                 if email:
-                    msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+                    msg = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
                     msg.body = "Dear " + data['Name'] + ", you have successfully casted your vote"
                     mail.send(msg)
                 return redirect(url_for('dashboard'))
             else:
-                flash('Invalid Credentials')
+                flash('Invalid Credentials','danger')
                 return render_template('vote_candidate.html',form=form,candidate=candidate)
             cur.close()
     return render_template('vote_candidate.html',form=form,candidate=candidate)
@@ -571,7 +573,6 @@ class ElectionOfficerRegisterform(Form):
 @is_logged_in
 def add_electionofficer():
     if session['type'] != 'A' :
-        flash('Only ADMIN can ADD','danger')
         return redirect(url_for('dashboard'))
     rows = []
     cur =mysql.connection.cursor()
@@ -595,7 +596,6 @@ def add_electionofficer():
         cur.execute("INSERT INTO ElectionOfficer(UserID, Constituency, Password) VALUES(%s, %s, %s)",(userid, constituency, password))
         mysql.connection.commit()
         cur.close()
-        flash('Succesfully Added!!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('add_electionofficer.html',form=form, rows = rows)
 
@@ -603,20 +603,17 @@ def add_electionofficer():
 @is_logged_in
 def remove_electionofficer(UserID):
     if session['type'] != 'A':
-        flash('ONLY ADMIN CAN REMOVE','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute('DELETE FROM ElectionOfficer WHERE UserID=%s',[UserID])
     mysql.connection.commit()
     cur.close()
-    flash('Succesfully Removed!!', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/StartStop_elections', methods=['POST'])
 @is_logged_in
 def StartStop_elections():
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
@@ -628,7 +625,6 @@ def StartStop_elections():
     cur.execute("UPDATE Constituency SET  StartStopElection = %s WHERE State = %s ",[status,constituency])
     mysql.connection.commit()
     cur.close()
-    flash('Sucess', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/StartStop_nominations', methods=['POST'])
@@ -647,14 +643,12 @@ def StartStop_nominations():
     cur.execute("UPDATE Constituency SET  StartStopNomination = %s WHERE State = %s ",[status,constituency])
     mysql.connection.commit()
     cur.close()
-    flash('Sucess', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/ShowHide_results', methods=['POST'])
 @is_logged_in
 def ShowHide_results():
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
@@ -666,7 +660,6 @@ def ShowHide_results():
     cur.execute("UPDATE Constituency SET ShowHideResults = %s WHERE State = %s ",[status,constituency])
     mysql.connection.commit()
     cur.close()
-    flash('Sucess', 'success')
     return redirect(url_for('dashboard'))
 
 @app.route('/validate_candidates', methods=['GET','POST'])
@@ -688,7 +681,6 @@ def validate_candidates():
 @is_logged_in
 def clear_candidates():
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     form = Passwordform(request.form)
@@ -704,10 +696,9 @@ def clear_candidates():
                 cur.execute("DELETE FROM Candidate WHERE Constituency = %s ",[constituency])
                 mysql.connection.commit()
                 cur.close()
-                flash('sucessful','sucess')
                 return redirect(url_for('dashboard'))
             else:
-                flash('Invalid Credentials')
+                flash('Invalid Credentials','danger')
                 cur.close()
                 return render_template('clear_candidates.html',form=form)
     cur.close()
@@ -717,7 +708,6 @@ def clear_candidates():
 @is_logged_in
 def reset_votes():
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     form = Passwordform(request.form)
@@ -734,7 +724,6 @@ def reset_votes():
                 cur.execute("UPDATE Voter natural join City set VotingStatus  = 0 WHERE State = %s ",[constituency])
                 mysql.connection.commit()
                 cur.close()
-                flash('sucessful','sucess')
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid Credentials')
@@ -747,7 +736,6 @@ def reset_votes():
 @is_logged_in
 def validate_candidate(AadhaarNumber):
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
@@ -755,12 +743,10 @@ def validate_candidate(AadhaarNumber):
     constituency = data['Constituency']
     result = cur.execute("SELECT * from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     if result == 0:
-        flash('Does not exsist','danger')
         cur.close()
         return redirect(url_for('dashboard'))
     candidate_details = cur.fetchone()
     if constituency != candidate_details['Constituency'] :
-        flash('Not of your Constituency','danger')
         cur.close()
         return redirect(url_for('dashboard'))
     cur.execute("SELECT * from Voter WHERE AadhaarNumber= %s",[AadhaarNumber])
@@ -772,7 +758,6 @@ def validate_candidate(AadhaarNumber):
 @is_logged_in
 def validate(AadhaarNumber):
     if session['type'] != 'E':
-        flash('ONLY ELECTIONOFFICER ALLOWED','danger')
         return redirect(url_for('dashboard'))
     cur = mysql.connection.cursor()
     cur.execute("SELECT Constituency FROM ElectionOfficer WHERE UserID = %s ",[session['username']])
@@ -780,12 +765,10 @@ def validate(AadhaarNumber):
     constituency = data['Constituency']
     result = cur.execute("SELECT Constituency from Candidate WHERE AadhaarNumber= %s",[AadhaarNumber])
     if result == 0:
-        flash('Does not exsist','danger')
         cur.close()
         return redirect(url_for('dashboard'))
     candidate_details = cur.fetchone()
     if constituency != candidate_details['Constituency'] :
-        flash('Not of your Constituency','danger')
         cur.close()
         return redirect(url_for('dashboard'))
     cur.execute("SELECT Validate FROM Candidate WHERE AadhaarNumber = %s ",[AadhaarNumber])
@@ -795,7 +778,7 @@ def validate(AadhaarNumber):
     email_data = cur.fetchone()
     email = email_data['Emailid']
     if email:
-        msg = Message('Mobile Voting', sender = 'charancharancharancharancharan@gmail.com', recipients = [email])
+        msg = Message('Mobile Voting', sender = 'mobilevotingteam@gmail.com', recipients = [email])
         if status == 1:
             msg.body = "Dear " + email_data['Name'] + ", you are now eligible to participate for elections"
         else:
@@ -839,5 +822,5 @@ def result(Constituency):
 if __name__ == '__main__':
     app.secret_key='secret123'
     app.run(debug=True)
-    # app.run(host='0.0.0.0')
+    # app.run(host='0.0.0.0',port=5005)
 

@@ -52,23 +52,43 @@
                         <div class="container">
                             {% include 'includes/_messages.html' %}
                             {% from "includes/_formhelpers.html" import render_field %}
-                            <form method='POST' action="">
-                                <div class="card-header card-header-rose card-header-icon">
-                                    <div class="card-icon">
-                                        <i class="material-icons">mail_outline</i>
-                                    </div>
-                                    <h4 class="card-title">Confirm Password</h4>
-                                </div>
-                                <br><br>
-                                
-                                <form action="" method="POST">
-        
-                                        <div class="form-group">
-                                            <label>Password</label>
-                                            <input type="password" name="password" class="form-control" value={{request.form.password}}>
-                                        </div>
-                                        <button type="submit" class="btn btn-fill btn-rose">Submit</button>
-                                    </form>
+                            <table class="table">
+                                    <tbody>
+                                            <tr>
+                                                    <td style="font-size: 18px" on-drag-left="10">
+                                                            <div class="row">
+                                                              <div class="">
+                                                                <img width="100" src="../static/img/{{candidate.PhotoLink }}"></br>
+                                                                <b>{{candidate.Name}}</b></br>
+                                                                <b>{{candidate.AadhaarNumber}}</b>
+                                                              </div>
+                                                          </td>   
+                                                    <td>
+                                                            <form method='POST' action="">
+                                                                    <div class="card-header card-header-rose card-header-icon">
+                                                                        <div class="card-icon">
+                                                                            <i class="material-icons">mail_outline</i>
+                                                                        </div>
+                                                                        <h4 class="card-title">Confirm Password</h4>
+                                                                    </div>
+                                                                    <br><br>
+                                                                    
+                                                                    <form action="" method="POST">
+                                            
+                                                                            <div class="form-group">
+                                                                                <label>Password</label>
+                                                                                <input type="password" name="password" class="form-control" value={{request.form.password}}>
+                                                                            </div>
+                                                                            <button type="submit" class="btn btn-fill btn-rose">Submit</button>
+                                                                        </form>
+                                                      </td> 
+                                              
+                                              
+                                              </tr>
+                                            
+                                          </tbody>
+                                </table>
+                            
                                 <br><br>
                             </form>
                         </div>
