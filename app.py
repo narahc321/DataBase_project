@@ -116,7 +116,8 @@ def register():
     return render_template('register.html',form=form)
 
 def send_otp(phone):
-    authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
+    result =authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
+    print result
 
 def send_mail(email,msg):
     if email:
@@ -824,6 +825,6 @@ def result(Constituency):
 
 if __name__ == '__main__':
     app.secret_key='secret123'
-    app.run(debug=True)
-    # app.run(host='0.0.0.0',port=5005)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0',port=5055)
 
