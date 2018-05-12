@@ -1,4 +1,5 @@
 import time
+import os
 import datetime
 from flask import Flask, render_template, flash ,redirect, request, url_for, session , logging
 from flask_mysqldb import MySQL
@@ -372,13 +373,15 @@ def withdraw():
         session['type'] = 'V'
         cur.close()
         return redirect(url_for('dashboard'))
-    cur.execute('SELECT StartStopNomination from Constituency,Candidate WHERE Constituency.State=Candidate.Constituency AND AadhaarNumber=%s',[username])
+    cur.execute('SELECT StartStopNomination,PhotoLink,SignatureLink from Constituency,Candidate WHERE Constituency.State=Candidate.Constituency AND AadhaarNumber=%s',[username])
     data = cur.fetchone()
     startstopnomination = data['StartStopNomination']
     if startstopnomination == 0:
         cur.close()
         return redirect(url_for('dashboard'))    
     session['type'] = 'V'
+    os.remove(os.path.join(app.config['UPLOADED_ITEMS_DEST'], data['PhotoLink']))
+    os.remove(os.path.join(app.config['UPLOADED_ITEMS_DEST'], data['SignatureLink']))
     cur.execute("DELETE FROM Candidate WHERE AadhaarNumber = %s",[username])
     mysql.connection.commit()
     cur.execute("SELECT Emailid,Name FROM Voter WHERE AadhaarNumber=%s",[username])
