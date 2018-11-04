@@ -33,7 +33,7 @@ app.config['MAIL_USERNAME'] = 'mobilevotingteam@gmail.com'
 app.config['MAIL_PASSWORD'] = 'Charan321'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-authy_api = AuthyApiClient('xeBa90E2swVpTZOXwljn2ksUxicPdQM3')
+authy_api = AuthyApiClient('C3k6fqO1HtycnKVc4a3VbYxitzpXip4a')
 
 #init MYSQL
 mysql = MySQL(app)
@@ -116,7 +116,7 @@ def register():
     return render_template('register.html',form=form)
 
 def send_otp(phone):
-    result =authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
+    # result = authy_api.phones.verification_start(phone, '91', via='sms',locale='en')
     print result
 
 def send_mail(email,msg):
@@ -139,9 +139,9 @@ def verify():
         return redirect(url_for('index'))
     if  request.method =='POST' and form.validate():
         otp = form.otp.data
-        check = authy_api.phones.verification_check(phone, '91', otp)
-        if check.ok():
-        # if True:
+        # check = authy_api.phones.verification_check(phone, '91', otp)
+        # if check.ok():
+        if True:
             cur =mysql.connection.cursor()
             result = cur.execute("select * from TempVoter WHERE MobileNumber = %s",[phone])
             if result == 0:
@@ -824,7 +824,6 @@ def result(Constituency):
     return render_template('result.html',candidates=candidates)
 
 if __name__ == '__main__':
-    app.secret_key='secret123'
-    # app.run(debug=True)
-    app.run(host='0.0.0.0',port=5055)
-
+    app.secret_key='secret12'
+    #app.run(debug=True)
+    app.run(host='0.0.0.0',port=8000)
